@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="DOST-LevelUP Project"
+run/main_scene="uid://ciypeq8dbd4cg"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
 
