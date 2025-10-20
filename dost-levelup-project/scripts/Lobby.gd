@@ -37,6 +37,10 @@ func _ready():
 		Network.broadcast_player_list()
 		connected_players = Network.players.duplicate()
 		_update_player_list()
+		# Prefill name input with host's current authoritative name
+		var my_id = multiplayer.get_unique_id()
+		if my_id in connected_players:
+			name_input.text = str(connected_players[my_id])
 	else:
 		# Ask server for current list
 		Network.rpc_id(1, "request_player_list")
@@ -82,7 +86,11 @@ func _change_name():
 		return
 	
 	var my_id = multiplayer.get_unique_id()
-	Network.rpc_id(1, "request_name_change", my_id, new_name)
+	if is_host:
+		# If we're the server, call the authoritative handler directly
+		Network.request_name_change(my_id, new_name)
+	else:
+		Network.rpc_id(1, "request_name_change", my_id, new_name)
 	status_label.text = "Changing name to: " + new_name
 
 func _on_player_list_updated(players: Dictionary):

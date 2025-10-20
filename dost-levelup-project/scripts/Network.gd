@@ -106,7 +106,7 @@ func broadcast_player_list() -> void:
 		rpc("rpc_update_player_list", players)
 
 
-@rpc("authority", "reliable")
+@rpc("any_peer", "reliable")
 func request_player_list() -> void:
 	# Called by clients to ask the server to broadcast the current player list
 	if not multiplayer.is_server():
@@ -114,7 +114,7 @@ func request_player_list() -> void:
 	broadcast_player_list()
 
 # Clients call this (via rpc_id to server) to request a name change
-@rpc("authority", "reliable")
+@rpc("any_peer", "reliable")
 func request_name_change(peer_id: int, new_name: String) -> void:
 	if not multiplayer.is_server():
 		return
