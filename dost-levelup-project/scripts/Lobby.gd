@@ -33,14 +33,13 @@ func _ready():
 	
 	# Request current player list from server
 	if is_host:
-		# If we're the host, read the authoritative players dict already set by Network
-		if Engine.has_singleton("Network") and "players" in Network:
-			connected_players = Network.players.duplicate()
-			_update_player_list()
+		# Re-broadcast from server to ensure lobby clients get the latest list
+		Network.broadcast_player_list()
+		connected_players = Network.players.duplicate()
+		_update_player_list()
 	else:
 		# Ask server for current list
-		if Engine.has_singleton("Network"):
-			Network.rpc_id(1, "request_player_list")
+		Network.rpc_id(1, "request_player_list")
 	
 	_update_player_list()
 
@@ -83,8 +82,7 @@ func _change_name():
 		return
 	
 	var my_id = multiplayer.get_unique_id()
-	if Engine.has_singleton("Network"):
-		Network.rpc_id(1, "request_name_change", my_id, new_name)
+	Network.rpc_id(1, "request_name_change", my_id, new_name)
 	status_label.text = "Changing name to: " + new_name
 
 func _on_player_list_updated(players: Dictionary):
@@ -116,8 +114,6 @@ func _update_player_list():
 	# Update start game button state
 	if is_host:
 		var min_players = 2
-		var max_players = 4
-		if Engine.has_singleton("Network") and "MAX_PLAYERS" in Network:
-			max_players = Network.MAX_PLAYERS
+		var max_players = Network.MAX_PLAYERS
 		start_game_button.disabled = connected_players.size() < min_players
 		status_label.text = "Players: " + str(connected_players.size()) + "/" + str(max_players)

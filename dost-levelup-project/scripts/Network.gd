@@ -121,11 +121,23 @@ func request_name_change(peer_id: int, new_name: String) -> void:
 	print("Server received name change for %d -> %s" % [peer_id, new_name])
 	players[peer_id] = new_name
 	broadcast_player_list()
+	# Send an acknowledgement directly to the requesting peer so their UI can react quickly
+	# rpc_id is invoked on the server's Network node to call the client-side handler
+	rpc_id(peer_id, "rpc_name_change_ack", peer_id, new_name)
 
 @rpc("any_peer", "reliable")
 func rpc_update_player_list(remote_players: Dictionary) -> void:
 	# Update local view of players when server broadcasts
 	players = remote_players.duplicate()
+	emit_signal("player_list_updated", players)
+	print("[Network] Received player list update: %s" % players)
+
+
+@rpc("any_peer", "reliable")
+func rpc_name_change_ack(peer_id: int, new_name: String) -> void:
+	# Server ack for name change - update local copy and emit signal
+	print("[Network] Name change ack for %d -> %s" % [peer_id, new_name])
+	players[peer_id] = new_name
 	emit_signal("player_list_updated", players)
 
 

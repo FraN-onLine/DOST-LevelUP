@@ -14,9 +14,10 @@ func _on_server_pressed():
 func _on_network_connected(success, reason):
 	if success:
 		# Move to lobby where the MultiplayerSpawner can spawn the host player
-		if ResourceLoader.exists("res://scenes/lobby.tscn"):
-			get_tree().change_scene("res://scenes/lobby.tscn")
+		var lobby_path = "res://scenes/Lobby.tscn"
+		if ResourceLoader.exists(lobby_path):
+			get_tree().change_scene_to_file(lobby_path)
 		else:
-			print("Lobby scene not found, but host started: %s" % reason)
+			print("Lobby scene not found at %s, but host started: %s" % [lobby_path, reason])
 	else:
 		push_error("Failed to start host: %s" % reason)
