@@ -1,0 +1,99 @@
+[gd_scene load_steps=2 format=3 uid="uid://crg4pfegvgxjp"]
+
+[sub_resource type="GDScript" id="GDScript_5q5h1"]
+script/source = "extends CharacterBody2D
+
+@onready var sprite = $Sprite2D
+@onready var collision_shape = $CollisionShape2D
+@onready var player_name_label = $PlayerName
+
+const SPEED = 200.0
+const JUMP_VELOCITY = -400.0
+
+# Get the gravity from the project settings to be synced with RigidBody nodes
+var gravity = ProjectSettings.get_setting(\"physics/2d/default_gravity\")
+
+func _ready():
+	# Set up visual representation
+	_setup_visual()
+	
+	# Set player name based on multiplayer authority
+	var player_id = get_multiplayer_authority()
+	if player_id == 1:
+		player_name_label.text = \"Host\"
+	else:
+		player_name_label.text = \"Player \" + str(player_id)
+	
+	# Set different colors for different players
+	_set_player_color(player_id)
+
+func _setup_visual():
+	# Create a simple colored rectangle as the player sprite
+	var texture = ImageTexture.new()
+	var image = Image.create(32, 32, false, Image.FORMAT_RGBA8)
+	image.fill(Color.WHITE)
+	texture.set_image(image)
+	sprite.texture = texture
+	
+	# Set up collision shape
+	var shape = RectangleShape2D.new()
+	shape.size = Vector2(32, 32)
+	collision_shape.shape = shape
+
+func _set_player_color(player_id: int):
+	var colors = [Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW]
+	var color_index = (player_id - 1) % colors.size()
+	
+	var texture = ImageTexture.new()
+	var image = Image.create(32, 32, false, Image.FORMAT_RGBA8)
+	image.fill(colors[color_index])
+	texture.set_image(image)
+	sprite.texture = texture
+
+func _physics_process(delta):
+	# Only process input for the player controlled by this peer
+	if not is_multiplayer_authority():
+		return
+	
+	# Add gravity
+	if not is_on_floor():
+		velocity.y += gravity * delta
+	
+	# Handle jump
+	if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+	
+	# Handle movement
+	var direction = Input.get_axis(\"move_left\", \"move_right\")
+	if direction != 0:
+		velocity.x = direction * SPEED
+	else:
+		velocity.x = move_toward(velocity.x, 0, SPEED)
+	
+	# Handle up/down movement (for testing)
+	if Input.is_action_pressed(\"move_up\"):
+		velocity.y = -SPEED
+	elif Input.is_action_pressed(\"move_down\"):
+		velocity.y = SPEED
+	else:
+		if is_on_floor():
+			velocity.y = 0
+	
+	move_and_slide()
+"
+
+[node name="Player" type="CharacterBody2D"]
+script = SubResource("GDScript_5q5h1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="PlayerName" type="Label" parent="."]
+offset_left = -20.0
+offset_top = -40.0
+offset_right = 20.0
+offset_bottom = -20.0
+text = "Player"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,0 +1,184 @@
+[gd_scene load_steps=2 format=3 uid="uid://b8k2m3n4p5q6r"]
+
+[ext_resource type="Script" uid="uid://c3w2eintc3nrp" path="res://scripts/MainMenu.gd" id="1_main"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.3, 0.4, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Louis Superficial Game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="HostButton" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "Host Game"
+
+[node name="JoinButton" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "Join Game"
+
+[node name="InstructionsButton" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "LAN Setup Instructions"
+
+[node name="QuitButton" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+text = "Quit"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -30.0
+offset_right = 400.0
+offset_bottom = -10.0
+grow_vertical = 0
+text = "Ready"
+horizontal_alignment = 1
+
+[node name="IPDisplay" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -100.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="IPLabel" type="Label" parent="IPDisplay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Host IP: Not hosting"
+vertical_alignment = 1
+
+[node name="InstructionsPanel" type="Panel" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InstructionsScroll" type="ScrollContainer" parent="InstructionsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InstructionsText" type="RichTextLabel" parent="InstructionsPanel/InstructionsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "[b]LAN Setup Instructions[/b]
+
+[b]For Host (Player 1):[/b]
+1. Click \"Host Game\" to start the server
+2. Share your IP address (shown in bottom-right corner)
+3. Wait for players to join in the lobby
+4. Click \"Start Game\" when ready
+
+[b]For Players (2-4):[/b]
+1. Click \"Join Game\"
+2. Enter the host's IP address
+3. Click \"Connect\"
+4. Wait in lobby for game to start
+
+[b]Finding IP Address:[/b]
+• [b]Windows:[/b] Open Command Prompt, type \"ipconfig\"
+• [b]Mac:[/b] System Preferences > Network
+• [b]Linux:[/b] Open Terminal, type \"ipconfig\"
+
+[b]Troubleshooting:[/b]
+• Make sure all computers are on the same WiFi/router
+• Check Windows Firewall settings
+• Try \"localhost\" for testing on same computer
+• Port 12345 must be open
+
+[b]Controls:[/b]
+• WASD or Arrow Keys: Move player
+• Space: Jump
+• Enter: Confirm name changes
+
+[b]Game Features:[/b]
+• Up to 4 players (1 host + 3 clients)
+• Real-time multiplayer
+• Color-coded players
+• Name changing in lobby"
+
+[node name="CloseInstructionsButton" type="Button" parent="InstructionsPanel"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 150.0
+offset_top = -40.0
+offset_right = 250.0
+offset_bottom = -10.0
+grow_vertical = 0
+text = "Close"
