@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Card" load_steps=2 format=3 uid="uid://bjwxff0xajcm2"]
+
+[ext_resource type="Script" uid="uid://bsesgdbmuhudn" path="res://cards/card.gd" id="1_sg8sj"]
+
+[resource]
+script = ExtResource("1_sg8sj")
+id = 1
+name = "BUILD"
+description = "fasasf"
+type = "fasfafaf"
+cost = 3
+card_frequency = 3
+metadata/_custom_type_script = "uid://bsesgdbmuhudn"

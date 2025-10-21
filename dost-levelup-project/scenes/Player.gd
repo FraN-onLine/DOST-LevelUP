@@ -4,6 +4,7 @@ extends Node
 # This node expects a child Control node named 'Cards' (HBox or VBox) to hold card Labels.
 
 @onready var cards = $Cards
+var hand = [Card] # The player's current hand of cards
 
 func _ready():
 	# Show placeholder until the Network rpc populates the cards
