@@ -9,8 +9,12 @@ extends Control
 func _ready():
 	# Inform the authoritative server that this client finished loading the Game scene.
 	# Server will collect these signals and, when everyone is ready, spawn players and send hands.
-	if Network and Network.multiplayer:
-		# Use rpc_id to call the server-side rpc_client_loaded
+	# If we're running as the server (host), call the handler directly. Clients should rpc_id the server.
+	if multiplayer.is_server():
+		# Call the server-side handler locally to mark server as ready
+		Network.rpc_client_loaded()
+	elif Network and Network.multiplayer:
+		# Clients notify the server that they finished loading the Game scene
 		Network.rpc_id(1, "rpc_client_loaded")
 
 	# Optionally, initialize UI placeholders
