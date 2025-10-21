@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://dedbpf86ccbmq"]
+
+[node name="Card Holder" type="Control"]
+layout_mode = 3
+anchor_right = 0.349
+anchor_bottom = 0.279
+offset_right = -0.0480042
+offset_bottom = 0.207993
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 1.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.14902, 0.14902, 0.14902, 0.309804)

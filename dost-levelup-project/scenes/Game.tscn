@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3 uid="uid://cudva8w7g4cq6"]
+
+[ext_resource type="PackedScene" uid="uid://dedbpf86ccbmq" path="res://scenes/card_holder.tscn" id="1_ibkli"]
+[ext_resource type="Script" uid="uid://160mq01f5ash" path="res://scripts/Game.gd" id="2_gamegd"]
+
+[node name="Game" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("2_gamegd")
+
+[node name="PlayerName" type="Label" parent="."]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 9.0
+offset_right = 123.0
+offset_bottom = 32.0
+text = "CUrrent Player"
+
+[node name="OpponentName" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1026.0
+offset_top = 7.0
+offset_right = 1140.0
+offset_bottom = 30.0
+text = "OppPlayer"
+
+[node name="PlayerCards" parent="." instance=ExtResource("1_ibkli")]
+layout_mode = 1
+offset_top = 498.0
+offset_right = 411.0
+offset_bottom = 645.0
+
+[node name="OpponentCards" parent="." instance=ExtResource("1_ibkli")]
+layout_mode = 1
+offset_left = 742.0
+offset_top = 495.0
+offset_right = 1153.0
+offset_bottom = 642.0
+
+[node name="Players" type="Node" parent="."]

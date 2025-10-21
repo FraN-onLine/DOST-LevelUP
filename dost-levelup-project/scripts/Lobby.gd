@@ -49,8 +49,9 @@ func _ready():
 
 func _on_start_game_pressed():
 	if is_host and connected_players.size() >= 2:
-		# Go to settings first
-		get_tree().change_scene_to_file("res://scenes/Game.tscn")
+		# Ask the server to start the game (authoritative). Network.start_game will deal and
+		# perform the scene-change handshake so all clients are transitioned correctly.
+		Network.start_game()
 
 func _on_leave_pressed():
 	if is_host:
