@@ -10,12 +10,9 @@ func _ready():
 	# Inform the authoritative server that this client finished loading the Game scene.
 	# Server will collect these signals and, when everyone is ready, spawn players and send hands.
 	# If we're running as the server (host), call the handler directly. Clients should rpc_id the server.
-	if multiplayer.is_server():
-		# Call the server-side handler locally to mark server as ready
-		Network.rpc_client_loaded()
-	elif Network and Network.multiplayer:
-		# Clients notify the server that they finished loading the Game scene
-		Network.rpc_id(1, "rpc_client_loaded")
+	if Network and Network.multiplayer:
+		# Use helper to call locally if we're server, or rpc_id the server if client.
+		Network.call_or_rpc_id(1, "rpc_client_loaded")
 
 	# Optionally, initialize UI placeholders
 	_clear_card_holders()
@@ -78,18 +75,22 @@ func _populate_card_holder(container: Node, hand: Array, face_up: bool, count: i
 @rpc("any_peer", "reliable")
 func rpc_set_player_names(names: Dictionary):
 	# names is a dictionary mapping peer_id -> display name
+	# RPC serialization can convert integer keys to strings, so coerce keys to int
 	var my_id = multiplayer.get_unique_id()
-	# Find the first peer_id that is not the current peer (opponent)
-	var opponent_id = -1
-	for pid in names.keys():
-		if pid != my_id:
-			opponent_id = pid
-			break
+	var my_name = null
+	var opp_name = null
+	for raw_key in names.keys():
+		var pid = int(raw_key)
+		var pname = names[raw_key]
+		if pid == my_id:
+			my_name = pname
+		else:
+			# take the first other peer as opponent (works for 2-player layout)
+			if opp_name == null:
+				opp_name = pname
 
 	# Set local UI labels (PlayerName on left, OpponentName on right)
-	if names.has(my_id):
-		if has_node("PlayerName"):
-			$PlayerName.text = str(names[my_id])
-	if opponent_id != -1 and names.has(opponent_id):
-		if has_node("OpponentName"):
-			$OpponentName.text = str(names[opponent_id])
+	if my_name != null and has_node("PlayerName"):
+		$PlayerName.text = str(my_name)
+	if opp_name != null and has_node("OpponentName"):
+		$OpponentName.text = str(opp_name)

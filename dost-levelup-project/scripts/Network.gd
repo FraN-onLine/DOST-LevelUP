@@ -18,6 +18,32 @@ var player_instances := {} # peer_id -> NodePath (server-side reference)
 var player_hands := {} # peer_id -> Array[int] (authoritative hands)
 var ready_peers := {} # peer_id -> true when that peer has loaded the Game scene
 
+# Utility: call locally if target_peer is self, otherwise rpc_id the remote peer.
+func call_or_rpc_id(target_peer: int, method_name: String, args: Array = []) -> void:
+	var my_id = multiplayer.get_unique_id()
+	if my_id == target_peer:
+		# Call local method on this node if it exists
+		if has_method(method_name):
+			# Use call_deferred to mimic async network delivery
+			call_deferred(method_name, args)
+		else:
+			push_warning("Network: local method '%s' not found" % method_name)
+	else:
+		# Use rpc_id to call the method on the remote peer
+		# Unpack args array into the rpc_id call
+		match args.size():
+			0:
+				rpc_id(target_peer, method_name)
+			1:
+				rpc_id(target_peer, method_name, args[0])
+			2:
+				rpc_id(target_peer, method_name, args[0], args[1])
+			3:
+				rpc_id(target_peer, method_name, args[0], args[1], args[2])
+			_:
+				# Generic fallback for more args
+				rpc_id(target_peer, method_name, args)
+
 func _ready():
 	# Connect multiplayer signals to forward events
 	multiplayer.peer_connected.connect(_on_peer_connected)
@@ -272,3 +298,33 @@ func _server_spawn_players_and_send_hands() -> void:
 
 	# Also broadcast player names so clients can update name labels in the Game scene
 	rpc("rpc_set_player_names", players)
+
+
+# --------------------
+# Client-side forwarders
+# These RPCs are invoked on the Network autoload by the server (rpc/rpc_id).
+# Forward them to the active scene (Game.gd) which contains the actual handlers/UI.
+@rpc("any_peer", "reliable")
+func rpc_receive_private_hand(hand: Array) -> void:
+	# This runs on clients. Forward to the current scene if it has the handler.
+	var scene = get_tree().get_current_scene()
+	if scene and scene.has_method("rpc_receive_private_hand"):
+		scene.rpc_receive_private_hand(hand)
+	else:
+		push_warning("No handler for rpc_receive_private_hand on current scene")
+
+@rpc("any_peer", "reliable")
+func rpc_set_public_hand_counts(public_counts: Dictionary) -> void:
+	var scene = get_tree().get_current_scene()
+	if scene and scene.has_method("rpc_set_public_hand_counts"):
+		scene.rpc_set_public_hand_counts(public_counts)
+	else:
+		push_warning("No handler for rpc_set_public_hand_counts on current scene")
+
+@rpc("any_peer", "reliable")
+func rpc_set_player_names(names: Dictionary) -> void:
+	var scene = get_tree().get_current_scene()
+	if scene and scene.has_method("rpc_set_player_names"):
+		scene.rpc_set_player_names(names)
+	else:
+		push_warning("No handler for rpc_set_player_names on current scene")
