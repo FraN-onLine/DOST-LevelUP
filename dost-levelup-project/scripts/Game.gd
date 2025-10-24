@@ -18,13 +18,33 @@ func _ready():
 	_clear_card_holders()
 
 func _clear_card_holders():
-	# If card holder scenes have children, clear them so the server's RPCs populate them
+	# Do not free slot nodes. Instead deactivate the item display inside each
+	# existing slot so the layout remains intact and we avoid creating new slots.
 	if player_cards and player_cards.get_child_count() > 0:
-		for c in player_cards.get_children():
-			c.queue_free()
+		for holder in player_cards.get_children():
+			var layout = holder
+			if holder.has_node("GridContainer"):
+				layout = holder.get_node("GridContainer")
+			for slot_node in layout.get_children():
+				if slot_node.has_node("CenterContainer/Panel/itemDisplay"):
+					slot_node.get_node("CenterContainer/Panel/itemDisplay").visible = false
+				# remove any dynamic labels left from previous fills
+				var panel = slot_node.get_node("CenterContainer/Panel")
+				for child in panel.get_children():
+					if child.name != "itemDisplay":
+						child.queue_free()
 	if opponent_cards and opponent_cards.get_child_count() > 0:
-		for c in opponent_cards.get_children():
-			c.queue_free()
+		for holder in opponent_cards.get_children():
+			var layout2 = holder
+			if holder.has_node("GridContainer"):
+				layout2 = holder.get_node("GridContainer")
+			for slot2_node in layout2.get_children():
+				if slot2_node.has_node("CenterContainer/Panel/itemDisplay"):
+					slot2_node.get_node("CenterContainer/Panel/itemDisplay").visible = false
+				var panel2 = slot2_node.get_node("CenterContainer/Panel")
+				for child2 in panel2.get_children():
+					if child2.name != "itemDisplay":
+						child2.queue_free()
 
 # These client-side RPCs are forwarded by the Network server to set public counts and
 # the client's private hand. The server calls rpc_id(peer, "rpc_receive_private_hand", hand)
@@ -59,12 +79,9 @@ func _populate_card_holder(container: Node, hand: Array, face_up: bool, count: i
 	if container.has_node("GridContainer"):
 		layout_node = container.get_node("GridContainer")
 
-	# Clears existing layout children
-	# Clear any existing dynamic children in the layout; the reuse/creation logic
-	# below will populate or reuse slots as needed.
-	for c in layout_node.get_children():
-		c.queue_free()
-	
+	# Do NOT clear or free children. Reuse existing card_slot nodes already present in
+	# the `card_holder` GridContainer. This prevents creating duplicate nodes.
+
 	# Determine how many slots we should show
 	var cards_to_create = 0
 	if count >= 0:
@@ -76,26 +93,26 @@ func _populate_card_holder(container: Node, hand: Array, face_up: bool, count: i
 	if typeof(layout_node) == TYPE_OBJECT and layout_node is GridContainer:
 		layout_node.columns = cards_to_create
 
-	var card_slot_scene := preload("res://UI/card_slot.tscn")
-
-	# Reuse existing slot nodes if present; if not enough, instantiate the remainder.
+	# Reuse existing slot nodes; do NOT instantiate new slots. If there are fewer
+	# slots than needed, warn and skip the extra slots.
 	var existing = layout_node.get_child_count()
+	if existing == 0:
+		push_warning("Card holder has no child slots; expected at least one slot.")
+
 	for i in range(cards_to_create):
-		var card_slot_inst: Node
-		if i < existing:
-			card_slot_inst = layout_node.get_child(i)
-			# clear previous dynamic children inside the Panel (except itemDisplay)
-			var panel = card_slot_inst.get_node("CenterContainer/Panel")
-			for child in panel.get_children():
-				if child.name != "itemDisplay":
-					child.queue_free()
-		else:
-			card_slot_inst = card_slot_scene.instantiate()
-			layout_node.add_child(card_slot_inst)
+		if i >= existing:
+			push_warning("Not enough slots in holder; expected %d but found %d" % [cards_to_create, existing])
+			continue
+
+		var card_slot_inst: Node = layout_node.get_child(i)
+		# clear previous dynamic children inside the Panel (except itemDisplay)
+		var panel = card_slot_inst.get_node("CenterContainer/Panel")
+		for child in panel.get_children():
+			if child.name != "itemDisplay":
+				child.queue_free()
 
 		# set slot index so clicks can be identified
-		if card_slot_inst.has_variable("slot_index"):
-			card_slot_inst.slot_index = i
+		card_slot_inst.slot_index = i
 
 		# connect click signal once (avoid duplicate connections)
 		var click_callable = Callable(self, "_on_card_clicked")
@@ -106,7 +123,6 @@ func _populate_card_holder(container: Node, hand: Array, face_up: bool, count: i
 		if face_up and i < hand.size():
 			var cid = hand[i]
 			var res_path = "res://cards/card_%d.tres" % cid
-			var panel = card_slot_inst.get_node("CenterContainer/Panel")
 			var itemDisplay = card_slot_inst.get_node("CenterContainer/Panel/itemDisplay")
 			if ResourceLoader.exists(res_path):
 				var card_res = ResourceLoader.load(res_path)
@@ -114,7 +130,6 @@ func _populate_card_holder(container: Node, hand: Array, face_up: bool, count: i
 					itemDisplay.texture = card_res.texture
 					itemDisplay.visible = true
 				else:
-					# fallback: show numeric id as label inside the slot panel
 					var lbl = Label.new()
 					lbl.text = str(cid)
 					panel.add_child(lbl)
@@ -159,3 +174,24 @@ func _on_card_clicked(slot_index: int) -> void:
 
 	# TODO: send selection to server or handle local interactions. Keeping this local
 	# avoids introducing new server RPCs in this change.
+
+
+@rpc("any_peer", "reliable")
+func rpc_update_energies(energies: Dictionary) -> void:
+	# Update UI labels for player and opponent energy whenever the server broadcasts
+	var my_id = multiplayer.get_unique_id()
+	var my_energy = null
+	var opp_energy = null
+	for raw_key in energies.keys():
+		var pid = int(raw_key)
+		var val = energies[raw_key]
+		if pid == my_id:
+			my_energy = val
+		else:
+			if opp_energy == null:
+				opp_energy = val
+
+	if my_energy != null and has_node("PlayerEnergy"):
+		$PlayerEnergy.text = str(my_energy)
+	if opp_energy != null and has_node("OpponentEnergy"):
+		$OpponentEnergy.text = str(opp_energy)

@@ -17,6 +17,8 @@ var players := {} # peer_id -> name
 var player_instances := {} # peer_id -> NodePath (server-side reference)
 var player_hands := {} # peer_id -> Array[int] (authoritative hands)
 var ready_peers := {} # peer_id -> true when that peer has loaded the Game scene
+var player_energy := {} # peer_id -> int (server-authoritative energy values)
+var _energy_timer: Timer = null
 
 # Utility: call locally if target_peer is self, otherwise rpc_id the remote peer.
 func call_or_rpc_id(target_peer: int, method_name: String, args: Array = []) -> void:
@@ -74,6 +76,8 @@ func start_host(port: int = DEFAULT_PORT) -> void:
 	# Add host to players list
 	var host_id = multiplayer.get_unique_id()
 	players[host_id] = "Host"
+	# initialize energy for host
+	player_energy[host_id] = 0
 	broadcast_player_list()
 	
 	print("Server started on port %d" % port)
@@ -85,6 +89,12 @@ func stop_host() -> void:
 		peer = null
 		print("Server stopped")
 		emit_signal("connected", false, "host_stopped")
+		# stop energy timer if running
+		if _energy_timer:
+			_energy_timer.stop()
+			_energy_timer.queue_free()
+			_energy_timer = null
+		player_energy.clear()
 
 func join_host(ip: String = DEFAULT_IP, port: int = DEFAULT_PORT) -> void:
 	peer = ENetMultiplayerPeer.new()
@@ -115,6 +125,8 @@ func _on_peer_connected(id: int) -> void:
 			return
 		# Assign a default name and broadcast
 		players[id] = "Player %d" % id
+		# initialize energy for the new player
+		player_energy[id] = 0
 		broadcast_player_list()
 	emit_signal("player_joined", id)
 
@@ -124,6 +136,8 @@ func _on_peer_disconnected(id: int) -> void:
 	if multiplayer.is_server():
 		if id in players:
 			players.erase(id)
+			if id in player_energy:
+				player_energy.erase(id)
 			broadcast_player_list()
 	emit_signal("player_left", id)
 
@@ -234,8 +248,11 @@ func deal_and_start_game(game_scene_path: String = "res://scenes/Game.tscn") -> 
 
 	# Prepare empty hands for each connected player
 	player_hands.clear()
+	# Prepare initial energy values for each connected player
+	player_energy.clear()
 	for peer_id in players.keys():
 		player_hands[peer_id] = []
+		player_energy[peer_id] = 0
 
 	# Deal 3 cards each
 	var cards_per_player := 3
@@ -332,6 +349,8 @@ func _server_spawn_players_and_send_hands() -> void:
 	# Also broadcast player names so clients can update name labels in the Game scene
 	rpc("rpc_set_player_names", players)
 	call_deferred("rpc_set_player_names", players)
+	# Start server-side periodic energy updates (every 2s)
+	_start_energy_timer()
 
 
 # --------------------
@@ -362,3 +381,35 @@ func rpc_set_player_names(names: Dictionary) -> void:
 		scene.rpc_set_player_names(names)
 	else:
 		push_warning("No handler for rpc_set_player_names on current scene")
+
+
+# Server-side periodic energy updates
+func _start_energy_timer() -> void:
+	if not multiplayer.is_server():
+		return
+	if _energy_timer:
+		return
+	_energy_timer = Timer.new()
+	_energy_timer.wait_time = 2.0
+	_energy_timer.one_shot = false
+	add_child(_energy_timer)
+	_energy_timer.timeout.connect(_on_energy_timer_timeout)
+	_energy_timer.start()
+
+func _on_energy_timer_timeout() -> void:
+	# Increment each player's energy by 1 every timeout and broadcast
+	for peer_id in players.keys():
+		player_energy[peer_id] = player_energy.get(peer_id, 0) + 1
+	# Broadcast updated energies to all peers
+	rpc("rpc_update_energies", player_energy)
+	# Ensure the server/local also receives the forwarded RPC
+	call_deferred("rpc_update_energies", player_energy)
+
+
+@rpc("any_peer", "reliable")
+func rpc_update_energies(energies: Dictionary) -> void:
+	var scene = get_tree().get_current_scene()
+	if scene and scene.has_method("rpc_update_energies"):
+		scene.rpc_update_energies(energies)
+	else:
+		push_warning("No handler for rpc_update_energies on current scene")
