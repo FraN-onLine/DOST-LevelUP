@@ -1,4 +1,6 @@
-[gd_scene format=3 uid="uid://dedbpf86ccbmq"]
+[gd_scene load_steps=2 format=3 uid="uid://dedbpf86ccbmq"]
+
+[ext_resource type="PackedScene" uid="uid://c253bntq5g4gy" path="res://UI/card_slot.tscn" id="1_oelby"]
 
 [node name="Card Holder" type="Control"]
 layout_mode = 3
@@ -10,6 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ColorRect" type="ColorRect" parent="."]
+modulate = Color(0.466667, 0.4, 1, 1)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,3 +24,17 @@ offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.14902, 0.14902, 0.14902, 0.309804)
+
+[node name="GridContainer" type="GridContainer" parent="."]
+layout_mode = 0
+offset_right = 403.0
+offset_bottom = 183.0
+
+[node name="card_slot" parent="GridContainer" instance=ExtResource("1_oelby")]
+layout_mode = 2
+
+[node name="card_slot2" parent="GridContainer" instance=ExtResource("1_oelby")]
+layout_mode = 2
+
+[node name="card_slot3" parent="GridContainer" instance=ExtResource("1_oelby")]
+layout_mode = 2

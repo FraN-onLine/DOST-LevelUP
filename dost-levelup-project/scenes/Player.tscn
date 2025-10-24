@@ -1,12 +1,13 @@
-[gd_scene format=3 uid="uid://player_minimal"]
+[gd_scene load_steps=2 format=3 uid="uid://ctp3nbuaus5ay"]
 
-[ext_resource type="GDScript" uid="uid://player_gd" path="res://scenes/Player.gd" id=1]
+[ext_resource type="Script" uid="uid://b6v7wgtdnvcua" path="res://scenes/Player.gd" id="1"]
 
 [node name="Player" type="Node"]
-script = ExtResource( 1 )
+script = ExtResource("1")
 
 [node name="Cards" type="HBoxContainer" parent="."]
-rect_min_size = Vector2(200, 48)
+visible = false
 
 [node name="LabelPlaceholder" type="Label" parent="Cards"]
+layout_mode = 2
 text = "card"
