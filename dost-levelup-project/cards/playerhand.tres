@@ -1,10 +1,12 @@
-[gd_resource type="Resource" script_class="Inventory" load_steps=11 format=3 uid="uid://dqav5un0rjaor"]
+[gd_resource type="Resource" script_class="Hand" load_steps=7 format=3 uid="uid://dqav5un0rjaor"]
 
-[ext_resource type="Script" uid="uid://bxfu686h256w1" path="res://cards/Hand.gd" id="1_vjgff"]
+[ext_resource type="Script" uid="uid://bxfu686h256w1" path="res://cards/Hand.gd" id="1_ef80p"]
 [ext_resource type="Script" uid="uid://ynalysw4txi0" path="res://cards/slot.gd" id="2_ef80p"]
+[ext_resource type="Resource" uid="uid://bjwxff0xajcm2" path="res://cards/card_1.tres" id="3_2ndu5"]
 
 [sub_resource type="Resource" id="Resource_7uf4i"]
 script = ExtResource("2_ef80p")
+item = ExtResource("3_2ndu5")
 metadata/_custom_type_script = "uid://ynalysw4txi0"
 
 [sub_resource type="Resource" id="Resource_oqpsp"]
@@ -15,27 +17,7 @@ metadata/_custom_type_script = "uid://ynalysw4txi0"
 script = ExtResource("2_ef80p")
 metadata/_custom_type_script = "uid://ynalysw4txi0"
 
-[sub_resource type="Resource" id="Resource_wq1fa"]
-script = ExtResource("2_ef80p")
-metadata/_custom_type_script = "uid://ynalysw4txi0"
-
-[sub_resource type="Resource" id="Resource_amcam"]
-script = ExtResource("2_ef80p")
-metadata/_custom_type_script = "uid://ynalysw4txi0"
-
-[sub_resource type="Resource" id="Resource_to21c"]
-script = ExtResource("2_ef80p")
-metadata/_custom_type_script = "uid://ynalysw4txi0"
-
-[sub_resource type="Resource" id="Resource_ajmj0"]
-script = ExtResource("2_ef80p")
-metadata/_custom_type_script = "uid://ynalysw4txi0"
-
-[sub_resource type="Resource" id="Resource_k5okl"]
-script = ExtResource("2_ef80p")
-metadata/_custom_type_script = "uid://ynalysw4txi0"
-
 [resource]
-script = ExtResource("1_vjgff")
-slots = Array[ExtResource("2_ef80p")]([SubResource("Resource_7uf4i"), SubResource("Resource_oqpsp"), SubResource("Resource_yrre2"), SubResource("Resource_wq1fa"), SubResource("Resource_amcam"), SubResource("Resource_to21c"), SubResource("Resource_ajmj0"), SubResource("Resource_k5okl")])
+script = ExtResource("1_ef80p")
+slots = Array[ExtResource("2_ef80p")]([SubResource("Resource_7uf4i"), SubResource("Resource_oqpsp"), SubResource("Resource_yrre2")])
 metadata/_custom_type_script = "uid://bxfu686h256w1"

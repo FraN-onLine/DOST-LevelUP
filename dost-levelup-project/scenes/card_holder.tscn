@@ -26,9 +26,17 @@ grow_vertical = 2
 color = Color(0.14902, 0.14902, 0.14902, 0.309804)
 
 [node name="GridContainer" type="GridContainer" parent="."]
-layout_mode = 0
-offset_right = 403.0
-offset_bottom = 183.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.002
+anchor_right = 1.002
+anchor_bottom = 1.011
+offset_left = -1.304
+offset_top = -1.0
+offset_right = -0.304047
+offset_bottom = -0.991013
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="card_slot" parent="GridContainer" instance=ExtResource("1_oelby")]
 layout_mode = 2

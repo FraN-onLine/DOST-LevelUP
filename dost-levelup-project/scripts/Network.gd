@@ -24,8 +24,19 @@ func call_or_rpc_id(target_peer: int, method_name: String, args: Array = []) -> 
 	if my_id == target_peer:
 		# Call local method on this node if it exists
 		if has_method(method_name):
-			# Use call_deferred to mimic async network delivery
-			call_deferred(method_name, args)
+			# Use call_deferred to mimic async network delivery, unpack args
+			match args.size():
+				0:
+					call_deferred(method_name)
+				1:
+					call_deferred(method_name, args[0])
+				2:
+					call_deferred(method_name, args[0], args[1])
+				3:
+					call_deferred(method_name, args[0], args[1], args[2])
+				_:
+					# Fallback: pass the args array as single parameter
+					call_deferred(method_name, args)
 		else:
 			push_warning("Network: local method '%s' not found" % method_name)
 	else:
@@ -155,6 +166,10 @@ func request_name_change(peer_id: int, new_name: String) -> void:
 	print("[Network] Name change ack for %d -> %s" % [peer_id, new_name])
 	players[peer_id] = new_name
 	emit_signal("player_list_updated", players)
+	# If the game already started, also update names in the active Game scene for all peers
+	if started:
+		rpc("rpc_set_player_names", players)
+		call_deferred("rpc_set_player_names", players)
 
 @rpc("any_peer", "reliable")
 func rpc_update_player_list(remote_players: Dictionary) -> void:
@@ -285,9 +300,10 @@ func _server_spawn_players_and_send_hands() -> void:
 
 		# Send the private hand to the owning peer (rpc_id -> client-side handler)
 		if player_hands.has(peer_id):
-			rpc_id(peer_id, "rpc_receive_private_hand", player_hands[peer_id])
+			# Use helper that calls locally for the host, rpc_id for remote peers
+			call_or_rpc_id(peer_id, "rpc_receive_private_hand", [player_hands[peer_id]])
 		else:
-			rpc_id(peer_id, "rpc_receive_private_hand", [])
+			call_or_rpc_id(peer_id, "rpc_receive_private_hand", [[]])
 
 	# Broadcast public counts so each client can show face-down cards for opponents
 	var public_counts := {}
@@ -295,9 +311,12 @@ func _server_spawn_players_and_send_hands() -> void:
 	for peer_id in players.keys():
 		public_counts[peer_id] = cards_per_player
 	rpc("rpc_set_public_hand_counts", public_counts)
+	# Ensure local server also receives the forwarded RPCs (rpc doesn't always call locally)
+	call_deferred("rpc_set_public_hand_counts", public_counts)
 
 	# Also broadcast player names so clients can update name labels in the Game scene
 	rpc("rpc_set_player_names", players)
+	call_deferred("rpc_set_player_names", players)
 
 
 # --------------------

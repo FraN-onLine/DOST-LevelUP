@@ -34,8 +34,8 @@ func _clear_card_holders():
 @rpc("any_peer", "reliable")
 func rpc_receive_private_hand(hand: Array):
 	# The server will send the array of card ids to the owning client
-	print("[Game] Received private hand: %s" % hand)
-	# Populate player_cards UI (simple labels) with actual values
+	# For each id we will try to load a Card resource (res://cards/card_<id>.tres)
+	# and instantiate a card slot for it so the card graphic appears.
 	_populate_card_holder(player_cards, hand, true)
 
 # Runs on all clients; provides how many cards each player has (public info)
@@ -53,7 +53,7 @@ func rpc_set_public_hand_counts(public_counts: Dictionary):
 		_populate_card_holder(opponent_cards, Array(), false, count)
 
 func _populate_card_holder(container: Node, hand: Array, face_up: bool, count: int = -1):
-	# Clears and fills `container` with Labels for each card.
+	# Clears and fills `container` with Card Slot instances (res://UI/card_slot.tscn)
 	for c in container.get_children():
 		c.queue_free()
 
@@ -63,13 +63,31 @@ func _populate_card_holder(container: Node, hand: Array, face_up: bool, count: i
 	else:
 		cards_to_create = hand.size()
 
+	var card_slot_scene := preload("res://UI/card_slot.tscn")
 	for i in range(cards_to_create):
-		var lbl = Label.new()
+		var card_slot_inst = card_slot_scene.instantiate()
+		# If face_up and we have an id for this slot, try to load the Card resource
 		if face_up and i < hand.size():
-			lbl.text = str(hand[i])
+			var cid = hand[i]
+			var res_path = "res://cards/card_%d.tres" % cid
+			if ResourceLoader.exists(res_path):
+				var card_res = ResourceLoader.load(res_path)
+				if card_res and card_res is Resource and card_res.texture:
+					card_slot_inst.get_node("CenterContainer/Panel/itemDisplay").texture = card_res.texture
+				else:
+					# fallback: show numeric id as label inside the slot panel
+					var lbl = Label.new()
+					lbl.text = str(cid)
+					card_slot_inst.get_node("CenterContainer/Panel").add_child(lbl)
+			else:
+				var lbl2 = Label.new()
+				lbl2.text = str(cid)
+				card_slot_inst.get_node("CenterContainer/Panel").add_child(lbl2)
 		else:
-			lbl.text = "X"
-		container.add_child(lbl)
+			# face-down: hide the item display texture (or set a placeholder)
+			card_slot_inst.get_node("CenterContainer/Panel/itemDisplay").visible = false
+
+		container.add_child(card_slot_inst)
 
 
 @rpc("any_peer", "reliable")
