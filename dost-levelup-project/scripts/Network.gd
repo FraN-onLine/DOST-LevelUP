@@ -211,10 +211,25 @@ func rpc_change_scene(scene_path: String) -> void:
 # --------------------
 
 func deal_and_start_game(game_scene_path: String = "res://scenes/Game.tscn") -> void:
-	# Build a simple deck of numeric IDs and shuffle
+	# Build a deck from actual card resources found in res://cards (card_*.tres)
 	var deck := []
-	for i in range(1, 53):
-		deck.append(i)
+	var dir = DirAccess.open("res://cards")
+	if dir:
+		dir.list_dir_begin()
+		var fname = dir.get_next()
+		while fname != "":
+			if not dir.current_is_dir():
+				# match files like card_1.tres or card_2.tres
+				if fname.begins_with("card_") and fname.ends_with(".tres"):
+					var id_str = fname.replace("card_", "").replace(".tres", "")
+					var id = int(id_str)
+					deck.append(id)
+			fname = dir.get_next()
+		dir.list_dir_end()
+	else:
+		# fallback: default small set
+		deck = [1,2]
+
 	deck.shuffle()
 
 	# Prepare empty hands for each connected player
