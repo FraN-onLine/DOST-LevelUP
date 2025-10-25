@@ -19,6 +19,29 @@ var player_hands := {} # peer_id -> Array[int] (authoritative hands)
 var ready_peers := {} # peer_id -> true when that peer has loaded the Game scene
 var player_energy := {} # peer_id -> int (server-authoritative energy values)
 var _energy_timer: Timer = null
+var card_pool := {} # id -> {path: String, name: String, frequency: int}
+@export var available_card_ids: Array = [1,2] # list of card ids the server can draw from (set in inspector or code)
+@export var card_back: Texture2D = null # optional explicit card back texture used for opponents
+
+# Programmatic helpers to control the available card pool at runtime
+func set_available_card_ids(ids: Array) -> void:
+	# Overwrite the available_card_ids used by the server for dealing
+	available_card_ids = ids.duplicate()
+	print("[Network] available_card_ids set to %s" % available_card_ids)
+
+func set_available_card_ids_from_scanned_pool() -> void:
+	# Build card_pool if empty and copy keys into available_card_ids (ids found under res://cards)
+	_build_card_pool()
+	var keys = card_pool.keys()
+	# keys() returns an Array of ids (as ints or strings depending on serialization), coerce to ints
+	var int_keys := []
+	for k in keys:
+		int_keys.append(int(k))
+	available_card_ids = int_keys
+	print("[Network] available_card_ids populated from scanned card pool: %s" % available_card_ids)
+
+func get_available_card_ids() -> Array:
+	return available_card_ids.duplicate()
 
 # Utility: call locally if target_peer is self, otherwise rpc_id the remote peer.
 func call_or_rpc_id(target_peer: int, method_name: String, args: Array = []) -> void:
@@ -76,6 +99,8 @@ func start_host(port: int = DEFAULT_PORT) -> void:
 	# Add host to players list
 	var host_id = multiplayer.get_unique_id()
 	players[host_id] = "Host"
+	# Print current available_card_ids so user knows what the server will draw from
+	print("[Network] available_card_ids = %s (count=%d)" % [available_card_ids, available_card_ids.size()])
 	# initialize energy for host
 	player_energy[host_id] = 0
 	broadcast_player_list()
@@ -225,26 +250,8 @@ func rpc_change_scene(scene_path: String) -> void:
 # --------------------
 
 func deal_and_start_game(game_scene_path: String = "res://scenes/Game.tscn") -> void:
-	# Build a deck from actual card resources found in res://cards (card_*.tres)
-	var deck := []
-	var dir = DirAccess.open("res://cards")
-	if dir:
-		dir.list_dir_begin()
-		var fname = dir.get_next()
-		while fname != "":
-			if not dir.current_is_dir():
-				# match files like card_1.tres or card_2.tres
-				if fname.begins_with("card_") and fname.ends_with(".tres"):
-					var id_str = fname.replace("card_", "").replace(".tres", "")
-					var id = int(id_str)
-					deck.append(id)
-			fname = dir.get_next()
-		dir.list_dir_end()
-	else:
-		# fallback: default small set
-		deck = [1,2]
-
-	deck.shuffle()
+	# Build a card pool from actual card resources found in res://cards (card_*.tres)
+	_build_card_pool()
 
 	# Prepare empty hands for each connected player
 	player_hands.clear()
@@ -254,17 +261,36 @@ func deal_and_start_game(game_scene_path: String = "res://scenes/Game.tscn") -> 
 		player_hands[peer_id] = []
 		player_energy[peer_id] = 0
 
-	# Deal 3 cards each
+	# Deal 3 cards each by sampling from `available_card_ids` (set by user).
 	var cards_per_player := 3
-	for i in range(cards_per_player):
-		for peer_id in players.keys():
-			if deck.size() == 0:
-				push_warning("Deck exhausted while dealing")
-				break
-			player_hands[peer_id].append(deck.pop_back())
+	var rng = RandomNumberGenerator.new()
+	rng.randomize()
+	# Create a global pool shuffled from available_card_ids and draw without replacement
+	var pool := available_card_ids.duplicate()
+	pool.shuffle()
+	for peer_id in players.keys():
+		var chosen := []
+		for j in range(cards_per_player):
+			if pool.size() == 0:
+				# refill the pool when exhausted
+				pool = available_card_ids.duplicate()
+				pool.shuffle()
+				if pool.size() == 0:
+					# nothing to draw from; fallback
+					chosen.append(1)
+					continue
+			chosen.append(pool.pop_back())
+		player_hands[peer_id] = chosen
 
 	# Reset handshake state
 	ready_peers.clear()
+
+	# Broadcast card pool metadata to clients so UI can show which cards exist
+	var pool_meta := {}
+	for k in card_pool.keys():
+		pool_meta[k] = {"path": card_pool[k].path, "name": card_pool[k].name, "frequency": card_pool[k].frequency}
+	rpc("rpc_set_card_pool", pool_meta)
+	call_deferred("rpc_set_card_pool", pool_meta)
 
 	# Ask all peers to change scene; clients will call back rpc_client_loaded when ready
 	if multiplayer.get_multiplayer_peer():
@@ -304,6 +330,30 @@ func _check_and_spawn_after_ready() -> void:
 	_server_spawn_players_and_send_hands()
 
 
+func _build_card_pool() -> void:
+	# Scan res://cards for card_*.tres and load card resources into card_pool
+	card_pool.clear()
+	var dir = DirAccess.open("res://cards")
+	if not dir:
+		return
+	dir.list_dir_begin()
+	var fname = dir.get_next()
+	while fname != "":
+		if not dir.current_is_dir():
+			if fname.begins_with("card_") and fname.ends_with(".tres"):
+				var id_str = fname.replace("card_", "").replace(".tres", "")
+				var id = int(id_str)
+				var path = "res://cards/%s" % fname
+				var res = ResourceLoader.load(path)
+				if res and res is Resource:
+					var freq = 1
+					if res and res.card_frequency != null:
+						freq = int(res.card_frequency)
+					card_pool[id] = {"path": path, "name": str(res.name), "frequency": freq}
+		fname = dir.get_next()
+	dir.list_dir_end()
+
+
 func _server_spawn_players_and_send_hands() -> void:
 	# Server-side: spawn Player nodes under a 'Players' container in the active scene
 	var root = get_tree().get_current_scene()
@@ -318,6 +368,15 @@ func _server_spawn_players_and_send_hands() -> void:
 	# Load the player scene if available; if missing, we won't instantiate scene objects but still send hands
 	var player_scene = ResourceLoader.load("res://scenes/Player.tscn")
 	player_instances.clear()
+
+	# Re-broadcast card pool metadata now that clients should be in the Game scene
+	# This ensures the Game scene receives the pool_meta (some clients may have ignored
+	# earlier pool broadcasts while still in the Lobby scene).
+	var pool_meta := {}
+	for k in card_pool.keys():
+		pool_meta[k] = {"path": card_pool[k].path, "name": card_pool[k].name, "frequency": card_pool[k].frequency}
+	rpc("rpc_set_card_pool", pool_meta)
+	call_deferred("rpc_set_card_pool", pool_meta)
 
 	for peer_id in players.keys():
 		# Instantiate a player node if the scene exists
@@ -353,6 +412,25 @@ func _server_spawn_players_and_send_hands() -> void:
 	_start_energy_timer()
 
 
+@rpc("any_peer", "reliable")
+func request_reveal_peer_card(target_peer_id: int, slot_index: int) -> void:
+	# Clients can call this on the server to request revealing a specific card of a player.
+	# Server validates and broadcasts the revealed card id to all peers.
+	if not multiplayer.is_server():
+		return
+	if not player_hands.has(target_peer_id):
+		push_warning("request_reveal_peer_card: target peer %d has no hand" % target_peer_id)
+		return
+	var hand = player_hands[target_peer_id]
+	if slot_index < 0 or slot_index >= hand.size():
+		push_warning("request_reveal_peer_card: invalid slot index %d for peer %d" % [slot_index, target_peer_id])
+		return
+	var card_id = int(hand[slot_index])
+	# Broadcast to all clients the revealed card id for that peer's slot
+	rpc("rpc_reveal_public_card", target_peer_id, slot_index, card_id)
+	call_deferred("rpc_reveal_public_card", target_peer_id, slot_index, card_id)
+
+
 # --------------------
 # Client-side forwarders
 # These RPCs are invoked on the Network autoload by the server (rpc/rpc_id).
@@ -381,6 +459,26 @@ func rpc_set_player_names(names: Dictionary) -> void:
 		scene.rpc_set_player_names(names)
 	else:
 		push_warning("No handler for rpc_set_player_names on current scene")
+
+
+@rpc("any_peer", "reliable")
+func rpc_set_card_pool(pool_meta: Dictionary) -> void:
+	# Forward card pool metadata to active scene UI for monitoring
+	var scene = get_tree().get_current_scene()
+	if scene and scene.has_method("rpc_set_card_pool"):
+		scene.rpc_set_card_pool(pool_meta)
+	else:
+		push_warning("No handler for rpc_set_card_pool on current scene")
+
+
+@rpc("any_peer", "reliable")
+func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void:
+	# Forward reveal broadcasts to the active scene which handles UI updates
+	var scene = get_tree().get_current_scene()
+	if scene and scene.has_method("rpc_reveal_public_card"):
+		scene.rpc_reveal_public_card(peer_id, slot_index, card_id)
+	else:
+		push_warning("No handler for rpc_reveal_public_card on current scene")
 
 
 # Server-side periodic energy updates

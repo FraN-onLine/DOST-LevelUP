@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://c253bntq5g4gy"]
+
+[ext_resource type="Script" uid="uid://bf27br628nx3k" path="res://UI/card_slot.gd" id="1_p0pna"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_phof1"]
+
+[node name="card_slot" type="Panel"]
+self_modulate = Color(0, 0, 0, 1)
+offset_right = 62.0
+offset_bottom = 61.0
+script = ExtResource("1_p0pna")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(31, 30)
+scale = Vector2(1.90625, 1.90625)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+offset_right = 61.0
+offset_bottom = 61.0
+
+[node name="Panel" type="Panel" parent="CenterContainer"]
+self_modulate = Color(1, 0.09, 0.09, 1)
+layout_mode = 2
+
+[node name="itemDisplay" type="Sprite2D" parent="CenterContainer/Panel"]
+scale = Vector2(1.5, 1.5)
+texture = SubResource("PlaceholderTexture2D_phof1")
