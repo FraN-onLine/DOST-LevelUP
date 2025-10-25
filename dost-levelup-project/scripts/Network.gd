@@ -429,6 +429,7 @@ func request_reveal_peer_card(target_peer_id: int, slot_index: int) -> void:
 	# Broadcast to all clients the revealed card id for that peer's slot
 	rpc("rpc_reveal_public_card", target_peer_id, slot_index, card_id)
 	call_deferred("rpc_reveal_public_card", target_peer_id, slot_index, card_id)
+	call_deferred("rpc_reveal_public_card", target_peer_id, slot_index, card_id)
 
 
 # --------------------
@@ -481,6 +482,17 @@ func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void
 		push_warning("No handler for rpc_reveal_public_card on current scene")
 
 
+@rpc("any_peer", "reliable")
+func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int) -> void:
+	# Forward building placement broadcasts to the active scene which handles UI updates
+	var scene = get_tree().get_current_scene()
+	if scene and scene.has_method("rpc_place_building"):
+		scene.rpc_place_building(owner_peer_id, plot_index, card_id)
+	else:
+		push_warning("No handler for rpc_place_building on current scene")
+
+
+
 # Server-side periodic energy updates
 func _start_energy_timer() -> void:
 	if not multiplayer.is_server():
@@ -497,11 +509,43 @@ func _start_energy_timer() -> void:
 func _on_energy_timer_timeout() -> void:
 	# Increment each player's energy by 1 every timeout and broadcast
 	for peer_id in players.keys():
-		player_energy[peer_id] = player_energy.get(peer_id, 0) + 1
+		# Clamp energy to a maximum of 1
+		player_energy[peer_id] = min(player_energy.get(peer_id, 0) + 1, 1)
 	# Broadcast updated energies to all peers
 	rpc("rpc_update_energies", player_energy)
 	# Ensure the server/local also receives the forwarded RPC
 	call_deferred("rpc_update_energies", player_energy)
+
+
+@rpc("any_peer", "reliable")
+func request_place_building(owner_peer_id: int, plot_index: int, card_id: int) -> void:
+	# Client requests server to place a building for owner_peer_id at plot_index using card_id
+	if not multiplayer.is_server():
+		return
+	var sender = multiplayer.get_remote_sender_id()
+	# only allow sender to request for their own player
+	if sender != owner_peer_id:
+		push_warning("Player %d attempted to place for owner %d" % [sender, owner_peer_id])
+		return
+	# Validate cost from card resource (default 1)
+	var cost = 1
+	var res_path = "res://cards/card_%d.tres" % int(card_id)
+	if ResourceLoader.exists(res_path):
+		var cre = ResourceLoader.load(res_path)
+		if cre and cre is Resource and cre.has_property("cost"):
+			cost = int(cre.cost)
+	# Check energy
+	var current_energy = player_energy.get(owner_peer_id, 0)
+	if current_energy < cost:
+		rpc_id(owner_peer_id, "rpc_place_failed", plot_index, card_id, "not_enough_energy")
+		return
+	# Deduct energy and broadcast update
+	player_energy[owner_peer_id] = max(0, current_energy - cost)
+	rpc("rpc_update_energies", player_energy)
+	call_deferred("rpc_update_energies", player_energy)
+	# Broadcast placement to all peers so they can instantiate the building locally
+	rpc("rpc_place_building", owner_peer_id, plot_index, card_id)
+	call_deferred("rpc_place_building", owner_peer_id, plot_index, card_id)
 
 
 @rpc("any_peer", "reliable")

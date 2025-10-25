@@ -8,6 +8,7 @@ extends Control
 var local_hand: Hand = null
 var card_pool_meta := {}
 var revealed_cards := {} # peer_id -> { slot_index: card_id }
+var selected_card_id = null
 
 func _ready():
 	# Inform the authoritative server that this client finished loading the Game scene.
@@ -266,9 +267,19 @@ func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void
 func _on_card_clicked(slot_index: int) -> void:
 	# Handle a local click on a card slot. Slot indices are 0-based from the left.
 	print("[Game] Card slot clicked:", slot_index)
+	# Select the clicked card (if we own it)
+	if local_hand == null:
+		return
+	if slot_index >= 0 and slot_index < local_hand.slots.size():
+		var s = local_hand.slots[slot_index]
+		if s.item != null:
+			selected_card_id = int(s.item.id)
+			print("[Game] Selected card id:", selected_card_id)
+		else:
+			selected_card_id = null
+	else:
+		selected_card_id = null
 
-	# TODO: send selection to server or handle local interactions. Keeping this local
-	# avoids introducing new server RPCs in this change.
 
 
 @rpc("any_peer", "reliable")
@@ -296,3 +307,78 @@ func rpc_set_card_pool(pool_meta: Dictionary) -> void:
 	# Store the card pool metadata for UI/debug monitoring (id -> name/path/frequency)
 	card_pool_meta = pool_meta.duplicate()
 	print("[Game] Received card pool metadata: %s" % card_pool_meta)
+
+func get_selected_card_id():
+	return selected_card_id
+
+
+@rpc("any_peer", "reliable")
+func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int) -> void:
+	# Server broadcast: update the UI for the player by placing the appropriate building
+	var root = get_tree().get_current_scene()
+	if not root:
+		return
+	if not root.has_node("Players"):
+		# no player nodes present; nothing to attach to
+		return
+	var players_node = root.get_node("Players")
+	var pname = "Player_%d" % owner_peer_id
+	if not players_node.has_node(pname):
+		push_warning("rpc_place_building: player node %s not found" % pname)
+		return
+	var player_node = players_node.get_node(pname)
+	# Try to find a plot container under the player node: common names are PlayerPlot, Plots, PlotContainer
+	var plot_container: Node = null
+	for candidate in ["PlayerPlot", "Plots", "PlotContainer"]:
+		if player_node.has_node(candidate):
+			var c = player_node.get_node(candidate)
+			if c and c.has_node("GridContainer"):
+				plot_container = c.get_node("GridContainer")
+				break
+			elif c and c is GridContainer:
+				plot_container = c
+				break
+	# as fallback check direct GridContainer child
+	if plot_container == null:
+		for child in player_node.get_children():
+			if child is GridContainer:
+				plot_container = child
+				break
+	if plot_container == null:
+		# can't place visually without a plot grid; as fallback, log and return
+		push_warning("rpc_place_building: no plot grid found under player %s" % pname)
+		return
+	# find the plot node by name Plot_<index> or by child index
+	var plot_node: Node = null
+	var plot_name = "Plot_%d" % plot_index
+	if plot_container.has_node(plot_name):
+		plot_node = plot_container.get_node(plot_name)
+	elif plot_index < plot_container.get_child_count():
+		plot_node = plot_container.get_child(plot_index)
+	if plot_node == null:
+		push_warning("rpc_place_building: plot node not found for index %d" % plot_index)
+		return
+	# If the plot node has a TextureRect child named Building, set its texture from the building scene
+	if plot_node.has_node("Building"):
+		var texr = plot_node.get_node("Building")
+		# For card id 1, use buildings/water_pump.tscn: extract first frame texture
+		if card_id == 1 and ResourceLoader.exists("res://buildings/water_pump.tscn"):
+			var b_scene = ResourceLoader.load("res://buildings/water_pump.tscn")
+			if b_scene and b_scene is PackedScene:
+				var inst = b_scene.instantiate()
+				# try to read AnimatedSprite2D sprite_frames first frame
+				if inst.has_method("get_sprite_frames") or inst is AnimatedSprite2D:
+					var sprite = inst
+					var frames = sprite.sprite_frames
+					if frames and frames.get_animation_count() > 0:
+						var anim = frames.get_animation_names()[0]
+						if frames.get_frame_count(anim) > 0:
+							var ftex = frames.get_frame(anim, 0)
+							if ftex:
+								texr.texture = ftex
+								texr.visible = true
+								return
+		# fallback: clear
+		texr.visible = false
+	else:
+		push_warning("rpc_place_building: plot node has no Building child to set texture")

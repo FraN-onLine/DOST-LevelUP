@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://cudva8w7g4cq6"]
+[gd_scene load_steps=4 format=3 uid="uid://cudva8w7g4cq6"]
 
 [ext_resource type="PackedScene" uid="uid://dedbpf86ccbmq" path="res://scenes/card_holder.tscn" id="1_ibkli"]
 [ext_resource type="Script" uid="uid://160mq01f5ash" path="res://scripts/Game.gd" id="2_gamegd"]
+[ext_resource type="PackedScene" uid="uid://cfdlnl2idxx8u" path="res://scenes/player_plot.tscn" id="3_cpr0p"]
 
 [node name="Game" type="Control"]
 layout_mode = 3
@@ -55,3 +56,17 @@ offset_right = 1153.0
 offset_bottom = 642.0
 
 [node name="Players" type="Node" parent="."]
+
+[node name="PlayerPlot" parent="." instance=ExtResource("3_cpr0p")]
+offset_left = 83.0
+offset_top = 103.0
+offset_right = 83.0
+offset_bottom = 103.0
+scale = Vector2(6, 6)
+
+[node name="OpponentPlot" parent="." instance=ExtResource("3_cpr0p")]
+offset_left = 743.0
+offset_top = 103.0
+offset_right = 743.0
+offset_bottom = 103.0
+scale = Vector2(6, 6)

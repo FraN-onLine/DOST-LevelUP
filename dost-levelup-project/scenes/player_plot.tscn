@@ -1,0 +1,88 @@
+[gd_scene load_steps=2 format=3 uid="uid://cfdlnl2idxx8u"]
+
+[ext_resource type="PackedScene" uid="uid://dbyrtjs0ruycc" path="res://scenes/plot_slot.tscn" id="1"]
+
+[node name="PlayerPlot" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="PlayerPlot#GridContainer" type="GridContainer" parent="."]
+layout_mode = 0
+offset_right = 59.0
+offset_bottom = 56.0
+columns = 5
+
+[node name="PlayerPlot_GridContainer#Plot_2" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_0" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_1" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_3" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_4" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_5" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_6" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_7" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_8" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_9" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_10" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_11" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_12" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_13" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_14" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_15" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_16" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_17" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_18" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_19" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_20" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_21" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_23" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_22" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2
+
+[node name="PlayerPlot_GridContainer#Plot_24" parent="PlayerPlot#GridContainer" instance=ExtResource("1")]
+layout_mode = 2

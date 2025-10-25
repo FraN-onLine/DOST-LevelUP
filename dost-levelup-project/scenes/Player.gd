@@ -9,6 +9,37 @@ var hand = [Card] # The player's current hand of cards
 func _ready():
 	# Show placeholder until the Network rpc populates the cards
 	_clear_cards()
+	# Optionally instance a PlayerPlot scene if present so players have a plot grid by default
+	if ResourceLoader.exists("res://scenes/player_plot.tscn") and not has_node("PlayerPlot"):
+		var ps = ResourceLoader.load("res://scenes/player_plot.tscn")
+		if ps and ps is PackedScene:
+			var inst = ps.instantiate()
+			inst.name = "PlayerPlot"
+			add_child(inst)
+			# Connect plot button signals to request placement when pressed (only for the owner)
+			var grid: Node = null
+			if inst.has_node("GridContainer"):
+				grid = inst.get_node("GridContainer")
+			elif inst is GridContainer:
+				grid = inst
+			if grid:
+				for i in range(grid.get_child_count()):
+					var p = grid.get_child(i)
+					if p and p.has_method("connect"):
+						p.connect("pressed", Callable(self, "_on_plot_pressed"), i)
+
+func _on_plot_pressed(index: int) -> void:
+	# Only allow owner to request placement
+	var owner = get_multiplayer_authority()
+	var my_id = multiplayer.get_unique_id()
+	if owner != my_id:
+		return
+	# Ask the Game scene what card is selected and request placement
+	var gs = get_tree().get_current_scene()
+	if gs and gs.has_method("get_selected_card_id"):
+		var cid = gs.get_selected_card_id()
+		if cid != null:
+			rpc_id(1, "request_place_building", owner, index, int(cid))
 
 func _clear_cards():
 	for c in cards.get_children():
