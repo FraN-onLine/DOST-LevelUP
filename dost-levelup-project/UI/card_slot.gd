@@ -4,6 +4,7 @@ extends Panel
 var name_tween: Tween = null
 var _orig_item_pos: Vector2
 @onready var cost_label = $Cost
+var _is_selected: bool = false  # Track selection state
 
 signal slot_clicked(slot_index)
 
@@ -59,20 +60,34 @@ func set_playable(enabled: bool) -> void:
 
 	# Public API: select/deselect slot (glowing pulse when selected)
 func set_selected(selected: bool) -> void:
+	_is_selected = selected  # Track state
 	# stop existing tween if any
 	if name_tween and name_tween.is_valid():
 		name_tween.kill()
 		name_tween = null
+	
 	if selected:
+		# Set initial scale and position for selected state
+		itemDisplay.scale = Vector2(2, 2)
+		itemDisplay.position = _orig_item_pos + Vector2(0, -8)
 		# create a pulsing tween on modulate to simulate glow
 		name_tween = create_tween()
 		name_tween.set_loops()
 		name_tween.tween_property(itemDisplay, "modulate", Color(0.8,0.9,1,1), 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		name_tween.tween_property(itemDisplay, "modulate", Color(1,1,1,1), 0.45).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	else:
+		# Reset scale and position when deselected
+		itemDisplay.scale = Vector2(1.5, 1.5)
+		itemDisplay.position = _orig_item_pos
 		itemDisplay.modulate = Color(1,1,1,1)
 
 func _on_mouse_entered():
+	# Show cost on hover regardless of selection state
+	if cost_label:
+		cost_label.visible = true
+	# Don't animate if selected
+	if _is_selected:
+		return
 	# Smoothly scale up when hovered
 	var t = create_tween()
 	# Animate the inner itemDisplay instead of the whole slot/panel. Container layouts
@@ -80,15 +95,15 @@ func _on_mouse_entered():
 	# layout reflows and visual stacking. Animating the child control avoids that.
 	t.tween_property(itemDisplay, "scale", Vector2(2, 2), 0.12)
 	t.tween_property(itemDisplay, "position", _orig_item_pos + Vector2(0, -8), 0.12)
-	# show cost on hover
-	if cost_label:
-		cost_label.visible = true
 
 func _on_mouse_exited():
+	# Hide cost when not hovered (regardless of selection)
+	if cost_label:
+		cost_label.visible = false
+	# Don't animate if selected
+	if _is_selected:
+		return
 	# Scale back down
 	var t = create_tween()
 	t.tween_property(itemDisplay, "scale", Vector2(1.5, 1.5), 0.12)
 	t.tween_property(itemDisplay, "position", _orig_item_pos, 0.12)
-	# hide cost when not hovered
-	if cost_label:
-		cost_label.visible = false
