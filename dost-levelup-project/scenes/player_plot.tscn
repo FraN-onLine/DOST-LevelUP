@@ -8,7 +8,7 @@ anchors_preset = 0
 
 [node name="PlayerPlot#GridContainer" type="GridContainer" parent="."]
 layout_mode = 0
-offset_right = 59.0
+offset_right = 56.0
 offset_bottom = 56.0
 columns = 5
 
