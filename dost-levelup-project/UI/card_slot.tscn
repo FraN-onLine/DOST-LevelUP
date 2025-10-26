@@ -1,8 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://c253bntq5g4gy"]
+[gd_scene load_steps=4 format=3 uid="uid://c253bntq5g4gy"]
 
 [ext_resource type="Script" uid="uid://bf27br628nx3k" path="res://UI/card_slot.gd" id="1_p0pna"]
-
-[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_phof1"]
+[ext_resource type="Texture2D" uid="uid://bvlj40gpqyi1w" path="res://Assets/cards/Card-back-temp.png" id="2_hrgpv"]
+[ext_resource type="FontFile" uid="uid://drkkic2osaftg" path="res://Assets/fonts/Minecraftia-Regular.ttf" id="3_4432s"]
 
 [node name="card_slot" type="Panel"]
 self_modulate = Color(0, 0, 0, 1)
@@ -26,4 +26,16 @@ layout_mode = 2
 
 [node name="itemDisplay" type="Sprite2D" parent="CenterContainer/Panel"]
 scale = Vector2(1.5, 1.5)
-texture = SubResource("PlaceholderTexture2D_phof1")
+texture = ExtResource("2_hrgpv")
+
+[node name="Cost" type="Label" parent="."]
+layout_mode = 0
+offset_left = 11.0
+offset_top = -81.0
+offset_right = 51.0
+offset_bottom = -53.0
+theme_override_colors/font_color = Color(1, 0.883333, 0, 1)
+theme_override_fonts/font = ExtResource("3_4432s")
+text = "5"
+horizontal_alignment = 1
+vertical_alignment = 1

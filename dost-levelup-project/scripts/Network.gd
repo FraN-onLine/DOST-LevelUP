@@ -429,7 +429,6 @@ func request_reveal_peer_card(target_peer_id: int, slot_index: int) -> void:
 	# Broadcast to all clients the revealed card id for that peer's slot
 	rpc("rpc_reveal_public_card", target_peer_id, slot_index, card_id)
 	call_deferred("rpc_reveal_public_card", target_peer_id, slot_index, card_id)
-	call_deferred("rpc_reveal_public_card", target_peer_id, slot_index, card_id)
 
 
 # --------------------
@@ -478,6 +477,12 @@ func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void
 	var scene = get_tree().get_current_scene()
 	if scene and scene.has_method("rpc_reveal_public_card"):
 		scene.rpc_reveal_public_card(peer_id, slot_index, card_id)
+		# Start a timer to automatically hide it after 1 second
+		get_tree().create_timer(1.0).timeout.connect(
+			func():
+				if scene and scene.has_method("rpc_hide_public_card"):
+					scene.rpc_hide_public_card(peer_id, slot_index)
+		)
 	else:
 		push_warning("No handler for rpc_reveal_public_card on current scene")
 
@@ -497,8 +502,12 @@ func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int) -> vo
 func _start_energy_timer() -> void:
 	if not multiplayer.is_server():
 		return
+	# Clean up existing timer if any
 	if _energy_timer:
-		return
+		_energy_timer.stop()
+		_energy_timer.queue_free()
+		_energy_timer = null
+	# Create new timer
 	_energy_timer = Timer.new()
 	_energy_timer.wait_time = 2.0
 	_energy_timer.one_shot = false
@@ -507,15 +516,44 @@ func _start_energy_timer() -> void:
 	_energy_timer.start()
 
 func _on_energy_timer_timeout() -> void:
+	if not multiplayer.is_server():
+		return
 	# Increment each player's energy by 1 every timeout and broadcast
 	for peer_id in players.keys():
-		# Clamp energy to a maximum of 1
-		player_energy[peer_id] = min(player_energy.get(peer_id, 0) + 1, 1)
+		if not player_energy.has(peer_id):
+			player_energy[peer_id] = 0
+		# Clamp energy to a maximum of 10 (adjustable)
+		var max_energy = 10
+		player_energy[peer_id] = min(player_energy[peer_id] + 1, max_energy)
+	
 	# Broadcast updated energies to all peers
 	rpc("rpc_update_energies", player_energy)
-	# Ensure the server/local also receives the forwarded RPC
+	# Ensure the server/local also receives the forwarded RPC 
 	call_deferred("rpc_update_energies", player_energy)
 
+
+@rpc("any_peer", "reliable")
+func request_use_card(owner_peer_id: int, _slot_index: int, _card_id: int, cost: int) -> void:
+	# Client requests server to use a card and deduct energy
+	if not multiplayer.is_server():
+		return
+	var sender = multiplayer.get_remote_sender_id()
+	# only allow sender to request for their own player
+	if sender != owner_peer_id:
+		push_warning("Player %d attempted to use card for owner %d" % [sender, owner_peer_id])
+		return
+	
+	# Check energy
+	var current_energy = player_energy.get(owner_peer_id, 0)
+	if current_energy < cost:
+		push_warning("Not enough energy for player %d (cost: %d, current: %d)" % [owner_peer_id, cost, current_energy])
+		return
+	
+	# Deduct energy and broadcast update
+	player_energy[owner_peer_id] = max(0, current_energy - cost)
+	rpc("rpc_update_energies", player_energy)
+	call_deferred("rpc_update_energies", player_energy)
+	
 
 @rpc("any_peer", "reliable")
 func request_place_building(owner_peer_id: int, plot_index: int, card_id: int) -> void:

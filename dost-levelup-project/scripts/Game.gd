@@ -9,17 +9,20 @@ var local_hand: Hand = null
 var card_pool_meta := {}
 var revealed_cards := {} # peer_id -> { slot_index: card_id }
 var selected_card_id = null
+var selected_card_slot_index = null
+@export var card_reveal_duration := 1.0 # Duration in seconds to show revealed cards # Duration in seconds to show revealed cards
 
 func _ready():
 	# Inform the authoritative server that this client finished loading the Game scene.
 	# Server will collect these signals and, when everyone is ready, spawn players and send hands.
 	# If we're running as the server (host), call the handler directly. Clients should rpc_id the server.
 	if Network and Network.multiplayer:
-		# Use helper to call locally if we're server, or rpc_id the server if client.
 		Network.call_or_rpc_id(1, "rpc_client_loaded")
 
 	# Optionally, initialize UI placeholders
 	_clear_card_holders()
+	# Connect plot slots so player can tap to place buildings
+	_connect_plot_slots()
 
 func _clear_card_holders():
 	# Do not free slot nodes. Instead deactivate the item display inside each
@@ -50,11 +53,169 @@ func _clear_card_holders():
 					if child2.name != "itemDisplay":
 						child2.queue_free()
 
+func _highlight_playable_cards(current_energy: int):
+	if not player_cards or local_hand == null:
+		return
+	var layout = player_cards.get_child(0)
+	if layout.has_node("GridContainer"):
+		layout = layout.get_node("GridContainer")
+	for i in range(local_hand.slots.size()):
+		var card_slot = local_hand.slots[i]
+		var node = layout.get_child(i)
+		# call UI method on slot node to set playable/dim state
+		if card_slot.item != null:
+			var cost = card_slot.item.cost if card_slot.item.has_method("cost") else 1
+			node.call_deferred("set_playable", current_energy >= cost)
+		else:
+			node.call_deferred("set_playable", false)
+		# reflect selection state
+		if selected_card_slot_index != null and selected_card_slot_index == i:
+			node.call_deferred("set_selected", true)
+		else:
+			node.call_deferred("set_selected", false)
+
 # These client-side RPCs are forwarded by the Network server to set public counts and
 # the client's private hand. The server calls rpc_id(peer, "rpc_receive_private_hand", hand)
 # which runs on the owning peer only.
 
 # Runs on the owning client only
+func _on_card_clicked(slot_index: int) -> void:
+	print("[Game] Card slot clicked:", slot_index)
+	
+	# First determine if this is a player or opponent card based on which container was clicked
+	var in_player_cards := false
+	
+	# Check if clicked slot is in player_cards
+	if player_cards and player_cards.get_child_count() > 0:
+		var layout = player_cards.get_child(0)
+		if layout.has_node("GridContainer"):
+			layout = layout.get_node("GridContainer")
+		if slot_index < layout.get_child_count():
+			in_player_cards = true
+	
+	# If it's a player card, handle removal and replacement
+	if in_player_cards and local_hand != null and slot_index >= 0 and slot_index < local_hand.slots.size():
+		var card_slot = local_hand.slots[slot_index]
+		if card_slot.item != null:
+			# Select the card if player has enough energy
+			var card_cost = card_slot.item.cost if card_slot.item.has_method("cost") else 1
+			var my_id = multiplayer.get_unique_id()
+			var current_energy = Network.player_energy.get(my_id, 0)
+			if current_energy >= card_cost:
+				# Deselect previous selection
+				if selected_card_slot_index != null and selected_card_slot_index >= 0:
+					# clear previous visual
+					var prev_layout = player_cards.get_child(0)
+					if prev_layout.has_node("GridContainer"):
+						prev_layout = prev_layout.get_node("GridContainer")
+					if selected_card_slot_index < prev_layout.get_child_count():
+						var prev_node = prev_layout.get_child(selected_card_slot_index)
+						prev_node.call_deferred("set_selected", false)
+				# set new selection
+				selected_card_id = card_slot.item.id
+				selected_card_slot_index = slot_index
+				var layout = player_cards.get_child(0)
+				if layout.has_node("GridContainer"):
+					layout = layout.get_node("GridContainer")
+				if slot_index < layout.get_child_count():
+					var node = layout.get_child(slot_index)
+					node.call_deferred("set_selected", true)
+				print("[Game] Selected card id:", selected_card_id)
+			else:
+				print("[Game] Not enough energy to select card (cost: %d, current: %d)" % [card_cost, current_energy])
+	# If it's an opponent card, request reveal
+	elif not in_player_cards:
+		var opp_id = _get_opponent_peer_id()
+		if opp_id > 0:
+			Network.request_reveal_peer_card(opp_id, slot_index)
+
+func _replace_card(slot_index: int) -> void:
+	if not Network or not Network.available_card_ids or Network.available_card_ids.is_empty():
+		return
+		
+	# Pick a random card from available pool
+	var available = Network.available_card_ids
+	var new_id = available[randi() % available.size()]
+	
+	# Load the card resource
+	var res_path = "res://cards/card_%d.tres" % new_id
+	if ResourceLoader.exists(res_path):
+		var card_res = ResourceLoader.load(res_path)
+		if local_hand and slot_index >= 0 and slot_index < local_hand.slots.size():
+			local_hand.slots[slot_index].item = card_res
+			# Update UI
+			_populate_card_holder(player_cards, [], true)
+
+
+# Connect player plot buttons so taps can place buildings
+func _connect_plot_slots() -> void:
+	if not has_node("PlayerPlot"):
+		return
+	var player_plot = $PlayerPlot
+	var container = player_plot
+	if player_plot.has_node("GridContainer"):
+		container = player_plot.get_node("GridContainer")
+	for i in range(container.get_child_count()):
+		var btn = container.get_child(i)
+		if btn:
+			# Connect with index bound as argument
+			if not btn.is_connected("pressed", _on_plot_pressed.bind(i)):
+				btn.connect("pressed", _on_plot_pressed.bind(i))
+
+
+# Handler when a plot is pressed by the local player
+func _on_plot_pressed(idx := -1) -> void:
+	var plot_index := idx
+	if plot_index < 0:
+		print("[Game] Invalid plot index")
+		return
+	if selected_card_slot_index == null or selected_card_slot_index < 0:
+		print("[Game] No card selected to place")
+		return
+	# Sanity checks
+	if local_hand == null:
+		print("[Game] No local hand")
+		return
+	if selected_card_slot_index >= local_hand.slots.size():
+		print("[Game] Selected slot index out of range")
+		return
+	var card_slot = local_hand.slots[selected_card_slot_index]
+	var my_id = multiplayer.get_unique_id()
+	var card_id = card_slot.item.id
+	var card_cost = card_slot.item.cost if card_slot.item.has_method("cost") else 1
+	var current_energy = Network.player_energy.get(my_id, 0)
+	if current_energy < card_cost:
+		print("[Game] Not enough energy to place building")
+		return
+	# Request server to place building (server will validate and broadcast)
+	if Network:
+		Network.request_place_building(my_id, plot_index, card_id)
+	# Locally remove the card and schedule replacement
+	local_hand.remove_from_slot(selected_card_slot_index)
+	# clear selection visuals
+	var layout = player_cards.get_child(0)
+	if layout.has_node("GridContainer"):
+		layout = layout.get_node("GridContainer")
+	if selected_card_slot_index < layout.get_child_count():
+		var node = layout.get_child(selected_card_slot_index)
+		node.call_deferred("set_selected", false)
+	# schedule replacement
+	var timer = get_tree().create_timer(3.0)
+	timer.timeout.connect(_replace_card.bind(selected_card_slot_index))
+	_populate_card_holder(player_cards, [], true)
+	selected_card_slot_index = -1
+	selected_card_id = null
+
+func _get_opponent_peer_id() -> int:
+	if not Network or not Network.players:
+		return -1
+	var my_id = multiplayer.get_unique_id()
+	# In 2-player game, find first id that isn't ours
+	for peer_id in Network.players.keys():
+		if peer_id != my_id:
+			return peer_id
+	return -1
+
 @rpc("any_peer", "reliable")
 func rpc_receive_private_hand(hand: Array):
 	# The server will send the array of card ids to the owning client
@@ -99,7 +260,7 @@ func rpc_set_public_hand_counts(public_counts: Dictionary):
 		var count = public_counts[peer_id]
 		_populate_card_holder(opponent_cards, Array(), false, count)
 
-func _populate_card_holder(container: Node, hand: Array, face_up: bool, count: int = -1):
+func _populate_card_holder(container: Node, _hand: Array, face_up: bool, count: int = -1):
 	# Find the layout GridContainer inside the holder
 	var layout_node: Node = container
 	if container.has_node("GridContainer"):
@@ -231,54 +392,90 @@ func rpc_set_player_names(names: Dictionary):
 
 @rpc("any_peer", "reliable")
 func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void:
-	# Server-authoritative broadcast that a specific peer's slot was revealed and
-	# which card id it contained. Store locally and update opponent UI.
+	# Server-authoritative broadcast that a specific peer's slot was revealed
 	var key = str(peer_id)
 	if not revealed_cards.has(key):
 		revealed_cards[key] = {}
 	revealed_cards[key][slot_index] = int(card_id)
-	# If this reveal applies to an opponent UI, update that slot display now
+	
+	# Skip if it's our own card - we already see it
 	var my_id = multiplayer.get_unique_id()
 	if peer_id == my_id:
-		# Owner already knows their cards; nothing to do
 		return
-	# Find the opponent holder and set the texture for the given slot
-	if opponent_cards and opponent_cards.get_child_count() > 0:
-		var holder = opponent_cards.get_child(0)
-		var layout = holder
-		if holder.has_node("GridContainer"):
-			layout = holder.get_node("GridContainer")
-		if slot_index < layout.get_child_count():
-			var slot_node = layout.get_child(slot_index)
-			var itemDisplay = slot_node.get_node("CenterContainer/Panel/itemDisplay")
-			var res_path = "res://cards/card_%d.tres" % int(card_id)
-			if ResourceLoader.exists(res_path):
-				var card_res = ResourceLoader.load(res_path)
-				if card_res and card_res.texture_face_up != null:
-					itemDisplay.texture = card_res.texture_face_up
-					itemDisplay.visible = true
-				elif card_res and card_res.texture_face_down != null:
-					itemDisplay.texture = card_res.texture_face_down
-					itemDisplay.visible = true
-			else:
-				push_warning("rpc_reveal_public_card: resource not found %s" % res_path)
+		
+	# Update opponent UI to show revealed card
+	_show_opponent_card(peer_id, slot_index, card_id)
+	
+	# Start timer to hide the card after reveal_duration
+	var timer = get_tree().create_timer(card_reveal_duration)
+	timer.timeout.connect(func(): _hide_opponent_card(peer_id, slot_index))
 
-
-func _on_card_clicked(slot_index: int) -> void:
-	# Handle a local click on a card slot. Slot indices are 0-based from the left.
-	print("[Game] Card slot clicked:", slot_index)
-	# Select the clicked card (if we own it)
-	if local_hand == null:
+func _show_opponent_card(_peer_id: int, slot_index: int, card_id: int) -> void:
+	if not opponent_cards or opponent_cards.get_child_count() == 0:
 		return
-	if slot_index >= 0 and slot_index < local_hand.slots.size():
-		var s = local_hand.slots[slot_index]
-		if s.item != null:
-			selected_card_id = int(s.item.id)
-			print("[Game] Selected card id:", selected_card_id)
-		else:
-			selected_card_id = null
+		
+	var holder = opponent_cards.get_child(0)
+	var layout = holder
+	if holder.has_node("GridContainer"):
+		layout = holder.get_node("GridContainer")
+		
+	if slot_index >= layout.get_child_count():
+		return
+		
+	var slot_node = layout.get_child(slot_index)
+	var item_display = slot_node.get_node("CenterContainer/Panel/itemDisplay")
+	
+	var res_path = "res://cards/card_%d.tres" % int(card_id)
+	if not ResourceLoader.exists(res_path):
+		push_warning("rpc_reveal_public_card: resource not found %s" % res_path)
+		return
+		
+	var card_res = ResourceLoader.load(res_path)
+	if card_res.texture_face_up != null:
+		item_display.texture = card_res.texture_face_up
+		item_display.visible = true
+	elif card_res.texture_face_down != null:
+		item_display.texture = card_res.texture_face_down
+		item_display.visible = true
+
+func _hide_opponent_card(peer_id: int, slot_index: int) -> void:
+	# Remove from revealed cards
+	var key = str(peer_id)
+	if revealed_cards.has(key):
+		revealed_cards[key].erase(slot_index)
+	
+	# Update opponent UI to show card back
+	if not opponent_cards or opponent_cards.get_child_count() == 0:
+		return
+		
+	var holder = opponent_cards.get_child(0)
+	var layout = holder
+	if holder.has_node("GridContainer"):
+		layout = holder.get_node("GridContainer")
+		
+	if slot_index >= layout.get_child_count():
+		return
+		
+	# Show card back if one is available
+	var slot_node = layout.get_child(slot_index)
+	var item_display = slot_node.get_node("CenterContainer/Panel/itemDisplay")
+	
+	var back_tex: Texture2D = null
+	if Network and Network.card_back != null:
+		back_tex = Network.card_back
+	elif ResourceLoader.exists("res://cards/card_1.tres"):
+		var fb = ResourceLoader.load("res://cards/card_1.tres")
+		if fb.texture_face_down != null:
+			back_tex = fb.texture_face_down
+		elif fb.texture_face_up != null:
+			back_tex = fb.texture_face_up
+			
+	if back_tex != null:
+		item_display.texture = back_tex
+		item_display.visible = true
 	else:
-		selected_card_id = null
+		item_display.visible = false
+
 
 
 
@@ -298,9 +495,9 @@ func rpc_update_energies(energies: Dictionary) -> void:
 				opp_energy = val
 
 	if my_energy != null and has_node("PlayerEnergy"):
-		$PlayerEnergy.text = str(my_energy)
+		$PlayerEnergy.text = "Energy: " + str(my_energy)
 	if opp_energy != null and has_node("OpponentEnergy"):
-		$OpponentEnergy.text = str(opp_energy)
+		$OpponentEnergy.text = "Energy: " + str(opp_energy)
 
 
 func rpc_set_card_pool(pool_meta: Dictionary) -> void:

@@ -1,86 +1,90 @@
-[gd_scene load_steps=22 format=3 uid="uid://dm2ncsa8nsks5"]
+[gd_scene load_steps=23 format=3 uid="uid://ce3xngesk7jhm"]
 
 [ext_resource type="Texture2D" uid="uid://8q6r1p7b1415" path="res://Assets/buildings/WaterPump_Station.png" id="1_jcmoc"]
+[ext_resource type="Script" uid="uid://bnxxn1bp5a1pi" path="res://buildings/water_pump.gd" id="2_tktok"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_tktok"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_jcmoc"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(0, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_eqj6y"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_tktok"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(128, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_msvs2"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_eqj6y"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(256, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ddcd8"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_msvs2"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(384, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_iobhc"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_ddcd8"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(512, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_cd3tv"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_iobhc"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(640, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_b2yw5"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_cd3tv"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(768, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_0v1ea"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_b2yw5"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(896, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_1rfdw"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_0v1ea"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(0, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_7ievd"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_1rfdw"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(128, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_hy2wi"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_7ievd"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(256, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_xdgsq"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_hy2wi"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(384, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_6bw23"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_xdgsq"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(512, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_6r8ng"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_6bw23"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(640, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_y2ijr"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_6r8ng"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(768, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_1n7t2"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_y2ijr"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(896, 128, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_l18hd"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_1n7t2"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(0, 256, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_vsd11"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_l18hd"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(128, 256, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_3mswn"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_vsd11"]
 atlas = ExtResource("1_jcmoc")
 region = Rect2(256, 256, 128, 128)
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_7wrtm"]
+[sub_resource type="SpriteFrames" id="SpriteFrames_3mswn"]
 animations = [{
 "frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jcmoc")
+}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_tktok")
 }, {
@@ -134,18 +138,14 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_vsd11")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_3mswn")
 }],
 "loop": true,
 "name": &"default",
 "speed": 10.0
 }]
 
-[ext_resource type="Script" uid="uid://waterpump_script" path="res://buildings/WaterPump.gd" id="101"]
-
-[node name="water_pump" type="AnimatedSprite2D"]
-script = ExtResource("101")
-sprite_frames = SubResource("SpriteFrames_7wrtm")
-frame_progress = 0.307479
+[node name="WaterPump" type="AnimatedSprite2D"]
+sprite_frames = SubResource("SpriteFrames_3mswn")
+autoplay = "default"
+frame_progress = 0.126642
+script = ExtResource("2_tktok")

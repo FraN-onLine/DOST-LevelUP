@@ -19,10 +19,10 @@ text = "CUrrent Player"
 
 [node name="PlayerEnergy" type="Label" parent="."]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 462.0
-offset_right = 124.0
-offset_bottom = 485.0
+offset_left = 9.0
+offset_top = 34.0
+offset_right = 123.0
+offset_bottom = 57.0
 text = "Energy: 0"
 
 [node name="OpponentName" type="Label" parent="."]
@@ -35,10 +35,10 @@ text = "OppPlayer"
 
 [node name="OpponentEnergy" type="Label" parent="."]
 layout_mode = 0
-offset_left = 1027.0
-offset_top = 459.0
-offset_right = 1141.0
-offset_bottom = 482.0
+offset_left = 1028.0
+offset_top = 34.0
+offset_right = 1142.0
+offset_bottom = 83.0
 text = "Energy: 0
 "
 
@@ -58,15 +58,17 @@ offset_bottom = 642.0
 [node name="Players" type="Node" parent="."]
 
 [node name="PlayerPlot" parent="." instance=ExtResource("3_cpr0p")]
-offset_left = 38.0
-offset_top = 81.0
-offset_right = 38.0
-offset_bottom = 81.0
+offset_left = 61.0
+offset_top = 91.0
+offset_right = 61.0
+offset_bottom = 91.0
 scale = Vector2(6, 6)
+metadata/_edit_lock_ = true
 
 [node name="OpponentPlot" parent="." instance=ExtResource("3_cpr0p")]
 offset_left = 761.0
-offset_top = 75.0
+offset_top = 90.0
 offset_right = 761.0
-offset_bottom = 75.0
+offset_bottom = 90.0
 scale = Vector2(6, 6)
+metadata/_edit_lock_ = true

@@ -1,10 +1,16 @@
-[gd_scene format=3 uid="uid://dbyrtjs0ruycc"]
+[gd_scene load_steps=2 format=3 uid="uid://dbyrtjs0ruycc"]
+
+[ext_resource type="PackedScene" uid="uid://ce3xngesk7jhm" path="res://buildings/water_pump.tscn" id="1_ge3gn"]
 
 [node name="PlotSlot" type="Button"]
 
 [node name="Building" type="TextureRect" parent="."]
-visible = false
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 stretch_mode = 2
+
+[node name="WaterPump" parent="." instance=ExtResource("1_ge3gn")]
+position = Vector2(4, -1)
+scale = Vector2(0.121094, 0.113281)
+frame_progress = 0.313617
