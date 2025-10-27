@@ -12,6 +12,6 @@ description = ""
 type = ""
 texture_face_up = ExtResource("3_oqhvb")
 texture_face_down = ExtResource("2_up8ii")
-cost = 0
+cost = 4
 card_frequency = 2
 metadata/_custom_type_script = "uid://bsesgdbmuhudn"

@@ -1,7 +1,7 @@
 extends Control
 
-# Game.gd - small helper to notify the Network singleton when the Game scene has loaded
-# and to provide local hookup points for UI nodes that display the local/opponent card holders.
+# Game.gd - manages card display, selection, and building placement
+# Uses CardSlot functions properly for card display and selection
 
 @onready var player_cards = $PlayerCards
 @onready var opponent_cards = $OpponentCards
@@ -10,7 +10,7 @@ var card_pool_meta := {}
 var revealed_cards := {} # peer_id -> { slot_index: card_id }
 var selected_card_id = null
 var selected_card_slot_index = null
-@export var card_reveal_duration := 1.0 # Duration in seconds to show revealed cards # Duration in seconds to show revealed cards
+@export var card_reveal_duration := 1.0 # Duration in seconds to show revealed cards
 
 func _ready():
 	# Inform the authoritative server that this client finished loading the Game scene.
@@ -74,11 +74,6 @@ func _highlight_playable_cards(current_energy: int):
 		else:
 			node.call_deferred("set_selected", false)
 
-# These client-side RPCs are forwarded by the Network server to set public counts and
-# the client's private hand. The server calls rpc_id(peer, "rpc_receive_private_hand", hand)
-# which runs on the owning peer only.
-
-# Runs on the owning client only
 func _on_card_clicked(slot_index: int) -> void:
 	print("[Game] Card slot clicked:", slot_index)
 	
@@ -93,7 +88,7 @@ func _on_card_clicked(slot_index: int) -> void:
 		if slot_index < layout.get_child_count():
 			in_player_cards = true
 	
-	# If it's a player card, handle removal and replacement
+	# If it's a player card, handle selection and validation
 	if in_player_cards and local_hand != null and slot_index >= 0 and slot_index < local_hand.slots.size():
 		var card_slot = local_hand.slots[slot_index]
 		if card_slot.item != null:
@@ -146,7 +141,6 @@ func _replace_card(slot_index: int) -> void:
 			# Update UI
 			_populate_card_holder(player_cards, [], true)
 
-
 # Connect player plot buttons so taps can place buildings
 func _connect_plot_slots() -> void:
 	if not has_node("PlayerPlot"):
@@ -161,7 +155,6 @@ func _connect_plot_slots() -> void:
 			# Connect with index bound as argument
 			if not btn.is_connected("pressed", _on_plot_pressed.bind(i)):
 				btn.connect("pressed", _on_plot_pressed.bind(i))
-
 
 # Handler when a plot is pressed by the local player
 func _on_plot_pressed(idx := -1) -> void:
@@ -475,7 +468,6 @@ func _hide_opponent_card(peer_id: int, slot_index: int) -> void:
 		item_display.visible = true
 	else:
 		item_display.visible = false
-
 
 
 
