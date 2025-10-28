@@ -43,6 +43,10 @@ func _gui_input(event):
 		# Only allow player to select their own cards
 		if is_player_card:
 			emit_signal("slot_clicked", slot_index)
+			if _is_selected:
+				set_selected(false)
+			else:
+				set_selected(true)
 
 func set_playable(enabled: bool) -> void:
 	_is_playable = enabled
