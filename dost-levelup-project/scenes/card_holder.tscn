@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://dedbpf86ccbmq"]
+[gd_scene load_steps=3 format=3 uid="uid://dedbpf86ccbmq"]
 
+[ext_resource type="Script" uid="uid://dba77uribcg3m" path="res://scenes/card_holder.gd" id="1_6nvbh"]
 [ext_resource type="PackedScene" uid="uid://c253bntq5g4gy" path="res://UI/card_slot.tscn" id="1_oelby"]
 
 [node name="Card Holder" type="Control"]
@@ -10,6 +11,7 @@ offset_right = -0.0480042
 offset_bottom = 0.207993
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_6nvbh")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 modulate = Color(0.466667, 0.4, 1, 1)

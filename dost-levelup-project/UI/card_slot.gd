@@ -47,6 +47,8 @@ func _gui_input(event):
 				set_selected(false)
 			else:
 				set_selected(true)
+				#set every other card slot to unselected?
+				get_parent().get_parent().call_deferred("deselect_other_slots", slot_index)
 
 func set_playable(enabled: bool) -> void:
 	_is_playable = enabled
@@ -75,19 +77,19 @@ func set_selected(selected: bool) -> void:
 		itemDisplay.modulate = Color(1, 1, 1, 1)
 
 func _on_mouse_entered():
-	if cost_label:
-		cost_label.visible = true
-	if _is_selected:
-		return
-	var t = create_tween()
-	t.tween_property(itemDisplay, "scale", Vector2(2, 2), 0.12)
-	t.tween_property(itemDisplay, "position", _orig_item_pos + Vector2(0, -8), 0.12)
+		if cost_label:
+			cost_label.visible = true
+		if _is_selected:
+			return
+		var t = create_tween()
+		t.tween_property(itemDisplay, "scale", Vector2(2, 2), 0.12)
+		t.tween_property(itemDisplay, "position", _orig_item_pos + Vector2(0, -8), 0.12)
 
 func _on_mouse_exited():
-	if cost_label:
-		cost_label.visible = false
-	if _is_selected:
-		return
-	var t = create_tween()
-	t.tween_property(itemDisplay, "scale", Vector2(1.5, 1.5), 0.12)
-	t.tween_property(itemDisplay, "position", _orig_item_pos, 0.12)
+		if cost_label:
+			cost_label.visible = false
+		if _is_selected:
+			return
+		var t = create_tween()
+		t.tween_property(itemDisplay, "scale", Vector2(1.5, 1.5), 0.12)
+		t.tween_property(itemDisplay, "position", _orig_item_pos, 0.12)

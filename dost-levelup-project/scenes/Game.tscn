@@ -55,6 +55,15 @@ offset_top = 495.0
 offset_right = 1153.0
 offset_bottom = 642.0
 
+[node name="card_slot" parent="OpponentCards/GridContainer" index="0"]
+is_player_card = false
+
+[node name="card_slot2" parent="OpponentCards/GridContainer" index="1"]
+is_player_card = false
+
+[node name="card_slot3" parent="OpponentCards/GridContainer" index="2"]
+is_player_card = false
+
 [node name="Players" type="Node" parent="."]
 
 [node name="PlayerPlot" parent="." instance=ExtResource("3_cpr0p")]
@@ -72,3 +81,6 @@ offset_right = 761.0
 offset_bottom = 90.0
 scale = Vector2(6, 6)
 metadata/_edit_lock_ = true
+
+[editable path="PlayerCards"]
+[editable path="OpponentCards"]
