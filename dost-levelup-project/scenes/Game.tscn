@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://cudva8w7g4cq6"]
+[gd_scene load_steps=5 format=3 uid="uid://cudva8w7g4cq6"]
 
 [ext_resource type="PackedScene" uid="uid://dedbpf86ccbmq" path="res://scenes/card_holder.tscn" id="1_ibkli"]
+[ext_resource type="PackedScene" uid="uid://bgotnrxymhdmn" path="res://scenes/camera_manager.tscn" id="2_78awf"]
 [ext_resource type="Script" uid="uid://160mq01f5ash" path="res://scripts/Game.gd" id="2_gamegd"]
 [ext_resource type="PackedScene" uid="uid://cfdlnl2idxx8u" path="res://scenes/player_plot.tscn" id="3_cpr0p"]
 
@@ -8,6 +9,8 @@
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("2_gamegd")
+
+[node name="camera_manager" parent="." instance=ExtResource("2_78awf")]
 
 [node name="PlayerName" type="Label" parent="."]
 layout_mode = 0
