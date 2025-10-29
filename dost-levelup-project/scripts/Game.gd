@@ -151,52 +151,46 @@ func _connect_plot_slots() -> void:
 		container = player_plot.get_node("GridContainer")
 	for i in range(container.get_child_count()):
 		var btn = container.get_child(i)
+		# bind them with their index [0,0 to 4,4]
+		print("Asads")
 		if btn:
-			# Connect with index bound as argument
-			if not btn.is_connected("pressed", _on_plot_pressed.bind(i)):
-				btn.connect("pressed", _on_plot_pressed.bind(i))
+			var plot_idx = [i % 5, i / 5] # assuming 5x5 grid
+			var callable = Callable(self, "_on_plot_pressed").bind(plot_idx)
+			btn.pressed.connect(callable)
 
 # Handler when a plot is pressed by the local player
-func _on_plot_pressed(idx := -1) -> void:
-	var plot_index := idx
-	if plot_index < 0:
-		print("[Game] Invalid plot index")
-		return
-	if selected_card_slot_index == null or selected_card_slot_index < 0:
+func _on_plot_pressed(idx) -> void:
+	print("asdakdjadja")
+	var plot_index = idx
+	if player_cards.current_selected == -1:
 		print("[Game] No card selected to place")
 		return
-	# Sanity checks
-	if local_hand == null:
-		print("[Game] No local hand")
-		return
-	if selected_card_slot_index >= local_hand.slots.size():
-		print("[Game] Selected slot index out of range")
-		return
-	var card_slot = local_hand.slots[selected_card_slot_index]
+
+	var card_slot = local_hand.slots[player_cards.current_selected]
 	var my_id = multiplayer.get_unique_id()
 	var card_id = card_slot.item.id
-	var card_cost = card_slot.item.cost if card_slot.item.has_method("cost") else 1
+	var card_cost = card_slot.item.cost
 	var current_energy = Network.player_energy.get(my_id, 0)
 	if current_energy < card_cost:
 		print("[Game] Not enough energy to place building")
 		return
 	# Request server to place building (server will validate and broadcast)
 	if Network:
-		Network.request_place_building(my_id, plot_index, card_id)
+		Network.request_place_building(my_id, plot_index, card_id, card_slot.item.building_scene)
 	# Locally remove the card and schedule replacement
-	local_hand.remove_from_slot(selected_card_slot_index)
+	local_hand.remove_from_slot(player_cards.current_selected)
 	# clear selection visuals
 	var layout = player_cards.get_child(0)
 	if layout.has_node("GridContainer"):
 		layout = layout.get_node("GridContainer")
-	if selected_card_slot_index < layout.get_child_count():
-		var node = layout.get_child(selected_card_slot_index)
+	if player_cards.current_selected < layout.get_child_count():
+		var node = layout.get_child(player_cards.current_selected)
 		node.call_deferred("set_selected", false)
 	# schedule replacement
 	var timer = get_tree().create_timer(3.0)
-	timer.timeout.connect(_replace_card.bind(selected_card_slot_index))
+	timer.timeout.connect(_replace_card.bind(player_cards.current_selected))
 	_populate_card_holder(player_cards, [], true)
-	selected_card_slot_index = -1
+	player_cards.current_selected = -1
 	selected_card_id = null
 
 func _get_opponent_peer_id() -> int:
@@ -300,6 +294,8 @@ func _populate_card_holder(container: Node, _hand: Array, face_up: bool, count: 
 					tex = s.item.texture_face_up
 				elif s.item and not face_up and s.item.texture_face_down != null:
 					tex = s.item.texture_face_down
+				slot_node.get_node("Cost").text = str(s.item.cost)
+				
 				
 
 			if tex != null:
@@ -502,7 +498,7 @@ func get_selected_card_id():
 
 
 @rpc("any_peer", "reliable")
-func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int) -> void:
+func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int, building_scene: PackedScene = null) -> void:
 	# Server broadcast: update the UI for the player by placing the appropriate building
 	var root = get_tree().get_current_scene()
 	if not root:
@@ -510,64 +506,25 @@ func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int) -> vo
 	if not root.has_node("Players"):
 		# no player nodes present; nothing to attach to
 		return
-	var players_node = root.get_node("Players")
-	var pname = "Player_%d" % owner_peer_id
-	if not players_node.has_node(pname):
-		push_warning("rpc_place_building: player node %s not found" % pname)
+	#place the scene as a child of the button's index, set the button's variables like current building and is_occupied 
+	if not has_node("PlayerPlot"):
 		return
-	var player_node = players_node.get_node(pname)
-	# Try to find a plot container under the player node: common names are PlayerPlot, Plots, PlotContainer
-	var plot_container: Node = null
-	for candidate in ["PlayerPlot", "Plots", "PlotContainer"]:
-		if player_node.has_node(candidate):
-			var c = player_node.get_node(candidate)
-			if c and c.has_node("GridContainer"):
-				plot_container = c.get_node("GridContainer")
+	var player_plot = $PlayerPlot
+	var container = player_plot
+	if player_plot.has_node("GridContainer"):
+		container = player_plot.get_node("GridContainer")
+	for i in range(container.get_child_count()):
+		var btn = container.get_child(i)
+		# bind them with their index [0,0 to 4,4]
+		if btn:
+			var plot_idx = [i % 5, i / 5] # assuming 5x5 grid
+			if plot_idx == plot_index:
+				# Found the correct plot button
+				if building_scene != null:
+					var building_instance = building_scene.instantiate()
+					btn.add_child(building_instance)
+					#btn.current_building = card_id
+					#btn.is_occupied = true
+				else:
+					print("[Game] rpc_place_building: No building scene provided for card_id %d" % card_id)
 				break
-			elif c and c is GridContainer:
-				plot_container = c
-				break
-	# as fallback check direct GridContainer child
-	if plot_container == null:
-		for child in player_node.get_children():
-			if child is GridContainer:
-				plot_container = child
-				break
-	if plot_container == null:
-		# can't place visually without a plot grid; as fallback, log and return
-		push_warning("rpc_place_building: no plot grid found under player %s" % pname)
-		return
-	# find the plot node by name Plot_<index> or by child index
-	var plot_node: Node = null
-	var plot_name = "Plot_%d" % plot_index
-	if plot_container.has_node(plot_name):
-		plot_node = plot_container.get_node(plot_name)
-	elif plot_index < plot_container.get_child_count():
-		plot_node = plot_container.get_child(plot_index)
-	if plot_node == null:
-		push_warning("rpc_place_building: plot node not found for index %d" % plot_index)
-		return
-	# If the plot node has a TextureRect child named Building, set its texture from the building scene
-	if plot_node.has_node("Building"):
-		var texr = plot_node.get_node("Building")
-		# For card id 1, use buildings/water_pump.tscn: extract first frame texture
-		if card_id == 1 and ResourceLoader.exists("res://buildings/water_pump.tscn"):
-			var b_scene = ResourceLoader.load("res://buildings/water_pump.tscn")
-			if b_scene and b_scene is PackedScene:
-				var inst = b_scene.instantiate()
-				# try to read AnimatedSprite2D sprite_frames first frame
-				if inst.has_method("get_sprite_frames") or inst is AnimatedSprite2D:
-					var sprite = inst
-					var frames = sprite.sprite_frames
-					if frames and frames.get_animation_count() > 0:
-						var anim = frames.get_animation_names()[0]
-						if frames.get_frame_count(anim) > 0:
-							var ftex = frames.get_frame(anim, 0)
-							if ftex:
-								texr.texture = ftex
-								texr.visible = true
-								return
-		# fallback: clear
-		texr.visible = false
-	else:
-		push_warning("rpc_place_building: plot node has no Building child to set texture")

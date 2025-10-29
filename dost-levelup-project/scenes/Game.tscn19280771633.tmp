@@ -66,6 +66,7 @@ offset_top = 91.0
 offset_right = 61.0
 offset_bottom = 91.0
 scale = Vector2(6, 6)
+plot_index = Vector2(0, 0)
 metadata/_edit_lock_ = true
 
 [node name="OpponentPlot" parent="." instance=ExtResource("3_cpr0p")]
@@ -74,4 +75,5 @@ offset_top = 90.0
 offset_right = 761.0
 offset_bottom = 90.0
 scale = Vector2(6, 6)
+plot_index = Vector2(0, 0)
 metadata/_edit_lock_ = true

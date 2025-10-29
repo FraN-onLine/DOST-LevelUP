@@ -488,11 +488,11 @@ func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void
 
 
 @rpc("any_peer", "reliable")
-func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int) -> void:
+func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int , card_scene: PackedScene = null) -> void:
 	# Forward building placement broadcasts to the active scene which handles UI updates
 	var scene = get_tree().get_current_scene()
 	if scene and scene.has_method("rpc_place_building"):
-		scene.rpc_place_building(owner_peer_id, plot_index, card_id)
+		scene.rpc_place_building(owner_peer_id, plot_index, card_id, card_scene)
 	else:
 		push_warning("No handler for rpc_place_building on current scene")
 
@@ -556,7 +556,7 @@ func request_use_card(owner_peer_id: int, _slot_index: int, _card_id: int, cost:
 	
 
 @rpc("any_peer", "reliable")
-func request_place_building(owner_peer_id: int, plot_index: int, card_id: int) -> void:
+func request_place_building(owner_peer_id: int, plot_index, card_id: int, scene: PackedScene) -> void:
 	# Client requests server to place a building for owner_peer_id at plot_index using card_id
 	if not multiplayer.is_server():
 		return
@@ -582,8 +582,8 @@ func request_place_building(owner_peer_id: int, plot_index: int, card_id: int) -
 	rpc("rpc_update_energies", player_energy)
 	call_deferred("rpc_update_energies", player_energy)
 	# Broadcast placement to all peers so they can instantiate the building locally
-	rpc("rpc_place_building", owner_peer_id, plot_index, card_id)
-	call_deferred("rpc_place_building", owner_peer_id, plot_index, card_id)
+	rpc("rpc_place_building", owner_peer_id, plot_index, card_id, scene)
+	call_deferred("rpc_place_building", owner_peer_id, plot_index, card_id, scene)
 
 
 @rpc("any_peer", "reliable")

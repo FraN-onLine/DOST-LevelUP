@@ -45,6 +45,7 @@ func _gui_input(event):
 			emit_signal("slot_clicked", slot_index)
 			if _is_selected:
 				set_selected(false)
+				get_parent().get_parent().current_selected = -1
 			else:
 				set_selected(true)
 				#set every other card slot to unselected?

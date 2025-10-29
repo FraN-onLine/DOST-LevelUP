@@ -13,19 +13,11 @@ func _ready():
 	production_rate = 5
 	energy_consumption = 2
 	
-	# Visual setup
-	_setup_visual()
-
-func _setup_visual():
-	# Load the water pump sprite
-	var sprite = Sprite2D.new()
-	add_child(sprite)
-	
-	# Try to load texture from building scene
-	if ResourceLoader.exists("res://buildings/WaterPump_Station.png"):
-		var texture = ResourceLoader.load("res://buildings/WaterPump_Station.png")
-		sprite.texture = texture
-
-func action():
-	print("WaterPump action - Producing water at rate: ", production_rate)
-	# Override for specific water pump actions
+func _process(delta):
+	#for every tile adjacent to the water pump, increase fire resistance
+	for x in range (plot_index[0]-1, plot_index[0]+1):
+		for y in range (plot_index[1]-1, plot_index[1]+1):
+			pass
+			#var tile = get_parent().get_tile_at(Vector2(x,y))
+			#if tile:
+			#	tile.fire_resistance = tile.fire_resistance * 0.8 #reduce fire damage by 20%

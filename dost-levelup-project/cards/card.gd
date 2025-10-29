@@ -9,3 +9,4 @@ class_name Card
 @export var texture_face_down: Texture2D
 @export var cost: int
 @export var card_frequency: int
+@export var building_scene: PackedScene
