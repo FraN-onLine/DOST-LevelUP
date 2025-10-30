@@ -146,9 +146,7 @@ func _connect_plot_slots() -> void:
 	if not has_node("PlayerPlot"):
 		return
 	var player_plot = $PlayerPlot
-	var container = player_plot
-	if player_plot.has_node("GridContainer"):
-		container = player_plot.get_node("GridContainer")
+	var container = player_plot.get_node("GridContainer")
 	for i in range(container.get_child_count()):
 		var btn = container.get_child(i)
 		# bind them with their index [0,0 to 4,4]
@@ -157,17 +155,70 @@ func _connect_plot_slots() -> void:
 			var plot_idx = [int(i % 5), int(i / 5)] # assuming 5x5 grid
 			btn.plot_index = plot_idx
 			btn.current_building = null
-			var callable = Callable(self, "_on_plot_pressed").bind(plot_idx, btn.is_occupied)
+			var callable = Callable(self, "_on_plot_pressed").bind(plot_idx, btn)
+			btn.pressed.connect(callable)
+	var opponent_plot = $OpponentPlot
+	container = opponent_plot.get_node("GridContainer")
+	for i in range(container.get_child_count()):
+		var btn = container.get_child(i)
+		# bind them with their index [0,0 to 4,4]
+		print("Asads")
+		if btn:
+			var plot_idx = [int(i % 5), int(i / 5)] # assuming 5x5 grid
+			btn.plot_index = plot_idx
+			btn.current_building = null
+			var callable = Callable(self, "_on_enemy_plot_pressed").bind(plot_idx, btn)
 			btn.pressed.connect(callable)
 
+
 # Handler when a plot is pressed by the local player
-func _on_plot_pressed(idx, is_occupied) -> void:
+func _on_plot_pressed(idx, btn) -> void:
+
 	print("asdakdjadja")
 	var plot_index = idx
 	if player_cards.current_selected == -1:
 		print("[Game] No card selected to place")
 		return
-	if is_occupied:
+	if btn.is_occupied:
+		print("[Game] Plot is already occupied")
+		return
+
+	var card_slot = local_hand.slots[player_cards.current_selected]
+	var my_id = multiplayer.get_unique_id()
+	var card_id = card_slot.item.id
+	var card_cost = card_slot.item.cost
+	var current_energy = Network.player_energy.get(my_id, 0)
+	if current_energy < card_cost:
+		print("[Game] Not enough energy to place building %d", current_energy)
+		return
+	# Request server to place building (server will validate and broadcast)
+	if Network:
+		print("this is reached or something lols")
+		Network.call_or_rpc_id(1, "request_place_building", [my_id, plot_index, card_id])
+	# Locally remove the card and schedule replacement
+	local_hand.remove_from_slot(player_cards.current_selected)
+	# clear selection visuals
+	var layout = player_cards.get_child(0)
+	if layout.has_node("GridContainer"):
+		layout = layout.get_node("GridContainer")
+	if player_cards.current_selected < layout.get_child_count():
+		var node = layout.get_child(player_cards.current_selected)
+		node.call_deferred("set_selected", false)
+	# schedule replacement
+	var timer = get_tree().create_timer(3.0)
+	timer.timeout.connect(_replace_card.bind(player_cards.current_selected))
+	_populate_card_holder(player_cards, [], true)
+	player_cards.current_selected = -1
+	selected_card_id = null
+
+func _on_enemy_plot_pressed(idx, btn) -> void:
+
+	print("asdakdjadja")
+	var plot_index = idx
+	if player_cards.current_selected == -1:
+		print("[Game] No card selected to place")
+		return
+	if btn.is_occupied:
 		print("[Game] Plot is already occupied")
 		return
 
@@ -292,6 +343,7 @@ func _populate_card_holder(container: Node, _hand: Array, face_up: bool, count: 
 		# For player holder: show item if local_hand has item in this slot
 		if container == player_cards and local_hand != null:
 			var s = local_hand.slots[i]
+			slot_node.card_resource = s.item
 			var itemDisplay = slot_node.get_node("CenterContainer/Panel/itemDisplay")
 			# Prefer explicit face_up/face_down textures if defined on the Card resource
 			var tex: Texture2D = null
@@ -385,92 +437,6 @@ func rpc_set_player_names(names: Dictionary):
 		$OpponentName.text = str(opp_name)
 
 
-@rpc("any_peer", "reliable")
-func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void:
-	# Server-authoritative broadcast that a specific peer's slot was revealed
-	var key = str(peer_id)
-	if not revealed_cards.has(key):
-		revealed_cards[key] = {}
-	revealed_cards[key][slot_index] = int(card_id)
-	
-	# Skip if it's our own card - we already see it
-	var my_id = multiplayer.get_unique_id()
-	if peer_id == my_id:
-		return
-		
-	# Update opponent UI to show revealed card
-	_show_opponent_card(peer_id, slot_index, card_id)
-	
-	# Start timer to hide the card after reveal_duration
-	var timer = get_tree().create_timer(card_reveal_duration)
-	timer.timeout.connect(func(): _hide_opponent_card(peer_id, slot_index))
-
-func _show_opponent_card(_peer_id: int, slot_index: int, card_id: int) -> void:
-	if not opponent_cards or opponent_cards.get_child_count() == 0:
-		return
-		
-	var holder = opponent_cards.get_child(0)
-	var layout = holder
-	if holder.has_node("GridContainer"):
-		layout = holder.get_node("GridContainer")
-		
-	if slot_index >= layout.get_child_count():
-		return
-		
-	var slot_node = layout.get_child(slot_index)
-	var item_display = slot_node.get_node("CenterContainer/Panel/itemDisplay")
-	
-	var res_path = "res://cards/card_%d.tres" % int(card_id)
-	if not ResourceLoader.exists(res_path):
-		push_warning("rpc_reveal_public_card: resource not found %s" % res_path)
-		return
-		
-	var card_res = ResourceLoader.load(res_path)
-	if card_res.texture_face_up != null:
-		item_display.texture = card_res.texture_face_up
-		item_display.visible = true
-	elif card_res.texture_face_down != null:
-		item_display.texture = card_res.texture_face_down
-		item_display.visible = true
-
-func _hide_opponent_card(peer_id: int, slot_index: int) -> void:
-	# Remove from revealed cards
-	var key = str(peer_id)
-	if revealed_cards.has(key):
-		revealed_cards[key].erase(slot_index)
-	
-	# Update opponent UI to show card back
-	if not opponent_cards or opponent_cards.get_child_count() == 0:
-		return
-		
-	var holder = opponent_cards.get_child(0)
-	var layout = holder
-	if holder.has_node("GridContainer"):
-		layout = holder.get_node("GridContainer")
-		
-	if slot_index >= layout.get_child_count():
-		return
-		
-	# Show card back if one is available
-	var slot_node = layout.get_child(slot_index)
-	var item_display = slot_node.get_node("CenterContainer/Panel/itemDisplay")
-	
-	var back_tex: Texture2D = null
-	if Network and Network.card_back != null:
-		back_tex = Network.card_back
-	elif ResourceLoader.exists("res://cards/card_1.tres"):
-		var fb = ResourceLoader.load("res://cards/card_1.tres")
-		if fb.texture_face_down != null:
-			back_tex = fb.texture_face_down
-		elif fb.texture_face_up != null:
-			back_tex = fb.texture_face_up
-			
-	if back_tex != null:
-		item_display.texture = back_tex
-		item_display.visible = true
-	else:
-		item_display.visible = false
-
 
 
 @rpc("any_peer", "reliable")
@@ -563,4 +529,46 @@ func rpc_place_building(owner_peer_id: int, plot_index, card_id: int) -> void:
 			btn.current_building = card_id
 			btn.is_occupied = true
 			print("[Game] Placed building for owner %d at %s (btn idx %d)" % [owner_peer_id, str(plot_index), i])
+			break
+
+@rpc("any_peer", "reliable")
+func rpc_trigger_disaster(owner_peer_id: int, plot_index, card_id: int) -> void:
+	print("[Game] Disaster triggered by %d at plot %s" % [owner_peer_id, str(plot_index)])
+
+	var root = get_tree().get_current_scene()
+	if not root:
+		return
+
+	# Determine target plot (enemy’s land)
+	var my_id = multiplayer.get_unique_id()
+	var target_plot: Node = null
+	if owner_peer_id == my_id:
+		# If I'm the one casting it, target opponent's plot
+		if root.has_node("OpponentPlot"):
+			target_plot = root.get_node("OpponentPlot")
+	else:
+		# If opponent cast it, target my plot
+		if root.has_node("PlayerPlot"):
+			target_plot = root.get_node("PlayerPlot")
+
+	if not target_plot:
+		push_warning("Could not find target plot for disaster.")
+		return
+
+	# Example effect: destroy or damage all buildings in target plot cell
+	var container = target_plot.get_node("GridContainer")
+
+	for i in range(container.get_child_count()):
+		var btn = container.get_child(i)
+		if not btn:
+			continue
+
+		var plot_idx = [int(i % 5), int(i / 5)]
+		if plot_idx.size() == plot_index.size() and int(plot_idx[0]) == int(plot_index[0]) and int(plot_idx[1]) == int(plot_index[1]):
+			# Found target cell → apply damage or remove building
+			for c in btn.get_children():
+				if c and c.name.begins_with("Building"): # optional filter
+					print("[Game] Destroying building at %s" % str(plot_index))
+					c.queue_free()
+					break
 			break

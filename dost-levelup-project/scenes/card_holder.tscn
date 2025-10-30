@@ -11,6 +11,7 @@ offset_right = -0.0480042
 offset_bottom = 0.207993
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("1_6nvbh")
 
 [node name="ColorRect" type="ColorRect" parent="."]

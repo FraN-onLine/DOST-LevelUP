@@ -2,16 +2,18 @@ extends Building
 
 class_name SandbagWarehouse
 
-var _buffed_positions := []
-const WATER_BUFF := 0.5
+var _buffed_positions = []
+const WATER_BUFF = 0.5
 
 func _ready():
     max_hp = 150
     hp = max_hp
-    fire_resistance = 0
-    wind_resistance = 0
-    water_resistance = 0.3
-    sturdiness = 0
+    # Stored values are "vulnerability": 1.0 = full damage taken, 0.0 = immune.
+    # So water_resistance = 0.7 means actual protection = 30%.
+    fire_resistance = 1
+    wind_resistance = 1
+    water_resistance = 0.7
+    sturdiness = 1
     attack = 0
     production_rate = 0
     energy_consumption = 10
@@ -32,12 +34,15 @@ func _apply_water_buff_to_self_and_adjacent():
                 continue
             if _buffed_positions.has(pos):
                 continue
-            # read current value if present, assume 0.0 otherwise
+            # Treat tile.water_resistance as vulnerability (1.0 = full damage).
             var current = tile.get("water_resistance")
             if current == null:
-                tile.set("water_resistance", 0.0)
-            # additive +50% (so a tile with 0 becomes 0.5)
-            tile.set("water_resistance", tile.get("water_resistance") + WATER_BUFF)
+                # default missing tiles to full vulnerability
+                current = 1.0
+                tile.set("water_resistance", current)
+            # Apply +50% protection -> reduce vulnerability by WATER_BUFF (clamped 0..1)
+            var new_vuln = clamp(current - WATER_BUFF, 0.0, 1.0)
+            tile.set("water_resistance", new_vuln)
             _buffed_positions.append(pos)
 
 func _exit_tree():
@@ -51,6 +56,17 @@ func _revert_water_buff():
         if not tile:
             continue
         var current = tile.get("water_resistance")
-        if current != null:
-            tile.set("water_resistance", current - WATER_BUFF)
+        if current == null:
+            continue
+        # Revert: increase vulnerability back (clamped 0..1)
+        var reverted = clamp(current + WATER_BUFF, 0.0, 1.0)
+        tile.set("water_resistance", reverted)
     _buffed_positions.clear()
+
+func take_damage(amount):
+    hp -= amount
+    if hp <= 0:
+        _revert_water_buff()
+        queue_free()
+    else:
+        pass

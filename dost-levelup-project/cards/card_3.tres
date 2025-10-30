@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Card" load_steps=5 format=3 uid="uid://ts5vsts1hyqn"]
+
+[ext_resource type="PackedScene" uid="uid://bxapsxcfenti2" path="res://buildings/broadcast.tscn" id="1_dwjdt"]
+[ext_resource type="Script" uid="uid://bsesgdbmuhudn" path="res://cards/card.gd" id="1_u61x4"]
+[ext_resource type="Texture2D" uid="uid://bvlj40gpqyi1w" path="res://Assets/cards/Card-back-temp.png" id="3_6j1m8"]
+[ext_resource type="Texture2D" uid="uid://c7647hfqxdnnq" path="res://icon.svg" id="4_fdoyj"]
+
+[resource]
+script = ExtResource("1_u61x4")
+id = 3
+name = ""
+description = ""
+type = "Building"
+texture_face_up = ExtResource("4_fdoyj")
+texture_face_down = ExtResource("3_6j1m8")
+cost = 2
+card_frequency = 0
+building_scene = ExtResource("1_dwjdt")
+metadata/_custom_type_script = "uid://bsesgdbmuhudn"

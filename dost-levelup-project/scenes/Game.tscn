@@ -1,9 +1,47 @@
-[gd_scene load_steps=5 format=3 uid="uid://cudva8w7g4cq6"]
+[gd_scene load_steps=12 format=3 uid="uid://cudva8w7g4cq6"]
 
 [ext_resource type="PackedScene" uid="uid://dedbpf86ccbmq" path="res://scenes/card_holder.tscn" id="1_ibkli"]
 [ext_resource type="PackedScene" uid="uid://bgotnrxymhdmn" path="res://scenes/camera_manager.tscn" id="2_78awf"]
 [ext_resource type="Script" uid="uid://160mq01f5ash" path="res://scripts/Game.gd" id="2_gamegd"]
 [ext_resource type="PackedScene" uid="uid://cfdlnl2idxx8u" path="res://scenes/player_plot.tscn" id="3_cpr0p"]
+[ext_resource type="FontFile" uid="uid://drkkic2osaftg" path="res://Assets/fonts/Minecraftia-Regular.ttf" id="3_s0nni"]
+[ext_resource type="Texture2D" uid="uid://q32nagr62ido" path="res://Assets/UI/Energy-Sheet.png" id="6_aug50"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kiw3p"]
+atlas = ExtResource("6_aug50")
+region = Rect2(0, 0, 70, 70)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_400sg"]
+atlas = ExtResource("6_aug50")
+region = Rect2(70, 0, 70, 70)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g4kob"]
+atlas = ExtResource("6_aug50")
+region = Rect2(140, 0, 70, 70)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qy1jj"]
+atlas = ExtResource("6_aug50")
+region = Rect2(210, 0, 70, 70)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3xj3m"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kiw3p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_400sg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g4kob")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qy1jj")
+}],
+"loop": true,
+"name": &"default",
+"speed": 6.0
+}]
 
 [node name="Game" type="Control"]
 layout_mode = 3
@@ -14,64 +52,85 @@ script = ExtResource("2_gamegd")
 
 [node name="PlayerName" type="Label" parent="."]
 layout_mode = 0
-offset_left = 9.0
-offset_top = 9.0
-offset_right = 123.0
-offset_bottom = 32.0
+offset_left = 32.0
+offset_top = 557.0
+offset_right = 182.0
+offset_bottom = 585.0
+theme_override_fonts/font = ExtResource("3_s0nni")
 text = "CUrrent Player"
 
 [node name="PlayerEnergy" type="Label" parent="."]
 layout_mode = 0
-offset_left = 9.0
-offset_top = 34.0
-offset_right = 123.0
-offset_bottom = 57.0
-text = "Energy: 0"
+offset_left = 87.0
+offset_top = 593.0
+offset_right = 201.0
+offset_bottom = 621.0
+theme_override_fonts/font = ExtResource("3_s0nni")
+text = "Energy: 3"
 
 [node name="OpponentName" type="Label" parent="."]
 layout_mode = 0
-offset_left = 1026.0
-offset_top = 7.0
-offset_right = 1140.0
-offset_bottom = 30.0
+offset_left = 1014.0
+offset_top = 551.0
+offset_right = 1128.0
+offset_bottom = 579.0
+theme_override_fonts/font = ExtResource("3_s0nni")
 text = "OppPlayer"
+horizontal_alignment = 2
 
 [node name="OpponentEnergy" type="Label" parent="."]
 layout_mode = 0
-offset_left = 1028.0
-offset_top = 34.0
-offset_right = 1142.0
-offset_bottom = 83.0
-text = "Energy: 0
+offset_left = 962.0
+offset_top = 594.0
+offset_right = 1076.0
+offset_bottom = 647.0
+theme_override_fonts/font = ExtResource("3_s0nni")
+text = "Energy: 3
 "
+horizontal_alignment = 2
 
 [node name="PlayerCards" parent="." instance=ExtResource("1_ibkli")]
+z_index = 1
 layout_mode = 1
-offset_top = 498.0
-offset_right = 411.0
-offset_bottom = 645.0
+offset_left = 381.0
+offset_top = 516.0
+offset_right = 762.0
+offset_bottom = 663.0
 
 [node name="OpponentCards" parent="." instance=ExtResource("1_ibkli")]
+z_index = 1
 layout_mode = 1
-offset_left = 742.0
-offset_top = 495.0
-offset_right = 1153.0
-offset_bottom = 642.0
+offset_left = -487.0
+offset_top = -157.0
+offset_right = -76.0
+offset_bottom = -10.0
 
 [node name="Players" type="Node" parent="."]
 
 [node name="PlayerPlot" parent="." instance=ExtResource("3_cpr0p")]
-offset_left = 61.0
-offset_top = 91.0
-offset_right = 61.0
-offset_bottom = 91.0
+offset_left = 24.0
+offset_top = 19.0
+offset_right = 24.0
+offset_bottom = 19.0
 scale = Vector2(6, 6)
-metadata/_edit_lock_ = true
 
 [node name="OpponentPlot" parent="." instance=ExtResource("3_cpr0p")]
-offset_left = 761.0
-offset_top = 90.0
-offset_right = 761.0
-offset_bottom = 90.0
+offset_left = 646.0
+offset_top = 16.0
+offset_right = 646.0
+offset_bottom = 16.0
 scale = Vector2(6, 6)
-metadata/_edit_lock_ = true
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(53, 604)
+scale = Vector2(0.871429, 0.871429)
+sprite_frames = SubResource("SpriteFrames_3xj3m")
+autoplay = "default"
+frame_progress = 0.436413
+
+[node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="."]
+position = Vector2(1110, 606)
+scale = Vector2(0.871429, 0.871429)
+sprite_frames = SubResource("SpriteFrames_3xj3m")
+autoplay = "default"
+frame_progress = 0.44364

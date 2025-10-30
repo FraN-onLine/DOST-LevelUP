@@ -1,6 +1,7 @@
 extends Control
 
 var current_selected = -1
+var current_selected_type = ""
 
 # Called when the node enters the scene tree for the first time.
 func deselect_other_slots(selected_index: int) -> void:

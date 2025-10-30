@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://caibej5bien4v"
-path="res://.godot/imported/BroadCast_Tower.png-8a57c129b2b87358f11b72f639aafe02.ctex"
+uid="uid://q32nagr62ido"
+path="res://.godot/imported/Energy-Sheet.png-7d6e8659eb1a069f1650fa8b34b65441.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/buildings/BroadCast_Tower.png"
-dest_files=["res://.godot/imported/BroadCast_Tower.png-8a57c129b2b87358f11b72f639aafe02.ctex"]
+source_file="res://Assets/UI/Energy-Sheet.png"
+dest_files=["res://.godot/imported/Energy-Sheet.png-7d6e8659eb1a069f1650fa8b34b65441.ctex"]
 
 [params]
 

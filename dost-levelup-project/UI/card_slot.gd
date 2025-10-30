@@ -46,8 +46,10 @@ func _gui_input(event):
 			if _is_selected:
 				set_selected(false)
 				get_parent().get_parent().current_selected = -1
+				get_parent().get_parent().current_selected_type = ""
 			else:
 				set_selected(true)
+				get_parent().get_parent().current_selected_type = card_resource.type
 				#set every other card slot to unselected?
 				get_parent().get_parent().call_deferred("deselect_other_slots", slot_index)
 

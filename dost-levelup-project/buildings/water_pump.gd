@@ -2,22 +2,40 @@ extends Building
 
 class_name WaterPump
 
+const WATER_PRODUCTION_RATE := 5.0  # Water units per second
+var stored_water := 0.0
+const MAX_WATER_STORAGE := 100.0
+
 func _ready():
 	max_hp = 120
 	hp = max_hp
-	fire_resistance = 0.5
-	wind_resistance = 1
-	water_resistance = 0
-	sturdiness = 1
+	fire_resistance = 1.0    # Takes full fire damage
+	wind_resistance = 1.0    # Takes full wind damage
+	water_resistance = 0.3   # Takes 30% water damage (70% resistant)
+	sturdiness = 1.0        # Takes full earthquake damage
 	attack = 0
-	production_rate = 5
-	energy_consumption = 2
-	
+	production_rate = WATER_PRODUCTION_RATE
+	energy_consumption = 10
+
 func _process(delta):
-	#for every tile adjacent to the water pump, increase fire resistance
-	for x in range (plot_index[0]-1, plot_index[0]+1):
-		for y in range (plot_index[1]-1, plot_index[1]+1):
-			pass
-			#var tile = get_parent().get_tile_at(Vector2(x,y)), get tile at is not yet defined
-			#if tile:
-			#	tile.fire_resistance = tile.fire_resistance * 0.8 #reduce fire damage by 20%
+	if stored_water < MAX_WATER_STORAGE:
+		stored_water = min(stored_water + (WATER_PRODUCTION_RATE * delta), MAX_WATER_STORAGE)
+
+# Called by other buildings to request water
+func request_water(amount: float) -> float:
+	if stored_water >= amount:
+		stored_water -= amount
+		return amount
+	else:
+		var available = stored_water
+		stored_water = 0
+		return available
+
+# Returns current water level (for UI display)
+func get_water_level() -> float:
+	return stored_water
+
+#func take_damage(amount):
+#	hp -= amount
+#	if hp <= 0:
+#		queue_free()

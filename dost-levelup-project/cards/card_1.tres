@@ -8,9 +8,9 @@
 [resource]
 script = ExtResource("1_sg8sj")
 id = 1
-name = "BUILD"
+name = "Water Pump"
 description = "fasasf"
-type = "fasfafaf"
+type = "Building"
 texture_face_up = ExtResource("3_bb7dw")
 texture_face_down = ExtResource("2_jgl5r")
 cost = 3

@@ -145,9 +145,9 @@ animations = [{
 }]
 
 [node name="WaterPump" type="AnimatedSprite2D"]
-position = Vector2(7, 6)
-scale = Vector2(0.212891, 0.201172)
+position = Vector2(16, 10)
+scale = Vector2(0.328125, 0.328125)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 autoplay = "default"
-frame_progress = 0.126642
+frame_progress = 0.305003
 script = ExtResource("2_tktok")
