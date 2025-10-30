@@ -18,9 +18,10 @@ var player_instances := {} # peer_id -> NodePath (server-side reference)
 var player_hands := {} # peer_id -> Array[int] (authoritative hands)
 var ready_peers := {} # peer_id -> true when that peer has loaded the Game scene
 var player_energy := {} # peer_id -> int (server-authoritative energy values)
+var energy_rate:= 2
 var _energy_timer: Timer = null
 var card_pool := {} # id -> {path: String, name: String, frequency: int}
-@export var available_card_ids: Array = [1,2,3,9] # list of card ids the server can draw from (set in inspector or code)
+@export var available_card_ids: Array = [1,2,3,9, 10, 11] # list of card ids the server can draw from (set in inspector or code)
 @export var card_back: Texture2D = null # optional explicit card back texture used for opponents
 
 # Programmatic helpers to control the available card pool at runtime
@@ -524,7 +525,7 @@ func _start_energy_timer() -> void:
 		_energy_timer = null
 	# Create new timer
 	_energy_timer = Timer.new()
-	_energy_timer.wait_time = 2.0
+	_energy_timer.wait_time = energy_rate
 	_energy_timer.one_shot = false
 	add_child(_energy_timer)
 	_energy_timer.timeout.connect(_on_energy_timer_timeout)

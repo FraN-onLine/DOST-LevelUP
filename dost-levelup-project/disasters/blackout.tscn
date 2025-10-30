@@ -291,7 +291,7 @@ animations = [{
 "speed": 16.0
 }]
 
-[node name="WaterPump" type="AnimatedSprite2D"]
+[node name="Blackout Burst" type="AnimatedSprite2D"]
 position = Vector2(16, 10)
 scale = Vector2(0.328125, 0.328125)
 sprite_frames = SubResource("SpriteFrames_3mswn")

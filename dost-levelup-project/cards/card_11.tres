@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="Card" load_steps=5 format=3 uid="uid://cbsrma5qv06h7"]
+
+[ext_resource type="PackedScene" uid="uid://d4aeb403u2h6r" path="res://disasters/quake_breaker.tscn" id="1_5vt1u"]
+[ext_resource type="Script" uid="uid://bsesgdbmuhudn" path="res://cards/card.gd" id="2_jtthm"]
+[ext_resource type="Texture2D" uid="uid://bvlj40gpqyi1w" path="res://Assets/cards/Card-back-temp.png" id="3_jgxq2"]
+[ext_resource type="Texture2D" uid="uid://bte73g1j785tq" path="res://Assets/landscape/map-grass2.png" id="4_4kele"]
+
+[resource]
+script = ExtResource("2_jtthm")
+id = 10
+name = "BlackOutBurst"
+description = ""
+type = "Disaster"
+texture_face_up = ExtResource("4_4kele")
+texture_face_down = ExtResource("3_jgxq2")
+cost = 0
+card_frequency = 0
+disaster_scene = ExtResource("1_5vt1u")
+metadata/_custom_type_script = "uid://bsesgdbmuhudn"

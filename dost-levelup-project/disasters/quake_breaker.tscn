@@ -353,6 +353,5 @@ position = Vector2(1, 1)
 scale = Vector2(0.898438, 0.941406)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 autoplay = "default"
-frame = 47
-frame_progress = 1.0
+frame_progress = 0.561331
 script = ExtResource("2_f4rju")
