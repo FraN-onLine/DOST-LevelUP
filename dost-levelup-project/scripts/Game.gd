@@ -499,34 +499,39 @@ func get_selected_card_id():
 
 
 @rpc("any_peer", "reliable")
-func rpc_place_building(owner_peer_id: int, plot_index, card_id: int, building_scene: PackedScene = null) -> void:
-	print("placed")
-	# Server broadcast: update the UI for the player by placing the appropriate building
+func rpc_place_building(_owner_peer_id: int, plot_index, card_id: int, building_scene: PackedScene = null) -> void:
+	print("[Network] rpc_place_building called for owner", owner_peer_id)
+	
 	var root = get_tree().get_current_scene()
 	if not root:
 		return
-	if not root.has_node("Players"):
-		# no player nodes present; nothing to attach to
-		return
-	#place the scene as a child of the button's index, set the button's variables like current building and is_occupied 
-	if not has_node("PlayerPlot"):
-		return
-	var player_plot = $PlayerPlot
+
+	# Determine which plot belongs to that owner
+	var player_plot: Node = null
+	if owner_peer_id == Multiplayer.get_unique_id():
+		# It's me
+		player_plot = root.get_node("PlayerPlot")
+	else:
+		# It's the opponent
+		if root.has_node("OpponentPlot"):
+			player_plot = root.get_node("OpponentPlot")
+
+	# The rest of your placement logic
 	var container = player_plot
 	if player_plot.has_node("GridContainer"):
 		container = player_plot.get_node("GridContainer")
+
 	for i in range(container.get_child_count()):
 		var btn = container.get_child(i)
-		# bind them with their index [0,0 to 4,4]
 		if btn:
-			var plot_idx = [int(i % 5), int(i / 5)] # assuming 5x5 grid
+			var plot_idx = [int(i % 5), int(i / 5)]
 			if plot_idx == plot_index:
-				# Found the correct plot button
 				if building_scene != null:
 					var building_instance = building_scene.instantiate()
 					btn.add_child(building_instance)
-					#btn.current_building = card_id
-					#btn.is_occupied = true
+					btn.set("current_building", card_id)
+					btn.set("is_occupied", true)
 				else:
-					print("[Game] rpc_place_building: No building scene provided for card_id %d" % card_id)
+					print("[rpc_place_building] No building scene for card", card_id)
 				break
+

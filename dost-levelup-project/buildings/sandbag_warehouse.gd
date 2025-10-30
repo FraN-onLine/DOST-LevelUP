@@ -33,7 +33,7 @@ func _apply_water_buff_to_self_and_adjacent():
             if _buffed_positions.has(pos):
                 continue
             # read current value if present, assume 0.0 otherwise
-            var current := tile.get("water_resistance")
+            var current = tile.get("water_resistance")
             if current == null:
                 tile.set("water_resistance", 0.0)
             # additive +50% (so a tile with 0 becomes 0.5)
@@ -50,7 +50,7 @@ func _revert_water_buff():
         var tile = get_parent().get_tile_at(pos)
         if not tile:
             continue
-        var current := tile.get("water_resistance")
+        var current = tile.get("water_resistance")
         if current != null:
             tile.set("water_resistance", current - WATER_BUFF)
     _buffed_positions.clear()
