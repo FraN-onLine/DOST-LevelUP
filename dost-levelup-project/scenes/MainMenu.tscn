@@ -36,7 +36,8 @@ grow_vertical = 2
 
 [node name="Title" type="Label" parent="VBoxContainer"]
 layout_mode = 2
-text = "Louis Superficial Game"
+text = "Munumundus:
+The Last Reigning City"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -56,7 +57,7 @@ text = "Join Game"
 [node name="InstructionsButton" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-text = "LAN Setup Instructions"
+text = "Instructions"
 
 [node name="QuitButton" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(0, 50)
@@ -135,41 +136,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 bbcode_enabled = true
-text = "[b]LAN Setup Instructions[/b]
-
-[b]For Host (Player 1):[/b]
-1. Click \"Host Game\" to start the server
-2. Share your IP address (shown in bottom-right corner)
-3. Wait for players to join in the lobby
-4. Click \"Start Game\" when ready
-
-[b]For Players (2-4):[/b]
-1. Click \"Join Game\"
-2. Enter the host's IP address
-3. Click \"Connect\"
-4. Wait in lobby for game to start
-
-[b]Finding IP Address:[/b]
-• [b]Windows:[/b] Open Command Prompt, type \"ipconfig\"
-• [b]Mac:[/b] System Preferences > Network
-• [b]Linux:[/b] Open Terminal, type \"ipconfig\"
-
-[b]Troubleshooting:[/b]
-• Make sure all computers are on the same WiFi/router
-• Check Windows Firewall settings
-• Try \"localhost\" for testing on same computer
-• Port 12345 must be open
-
-[b]Controls:[/b]
-• WASD or Arrow Keys: Move player
-• Space: Jump
-• Enter: Confirm name changes
-
-[b]Game Features:[/b]
-• Up to 4 players (1 host + 3 clients)
-• Real-time multiplayer
-• Color-coded players
-• Name changing in lobby"
+text = "ppap"
 
 [node name="CloseInstructionsButton" type="Button" parent="InstructionsPanel"]
 layout_mode = 1

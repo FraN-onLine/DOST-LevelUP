@@ -269,6 +269,9 @@ func deal_and_start_game(game_scene_path: String = "res://scenes/Game.tscn") -> 
 		player_hands[peer_id] = []
 		player_energy[peer_id] = 3
 
+	rpc("rpc_update_energies", player_energy)
+	call_deferred("rpc_update_energies", player_energy)
+
 	# Deal 3 cards each by sampling from `available_card_ids` (set by user).
 	var cards_per_player := 3
 	var rng = RandomNumberGenerator.new()
@@ -496,12 +499,12 @@ func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void
 
 
 @rpc("any_peer", "reliable")
-func rpc_place_building(owner_peer_id: int, plot_index, card_id: int , card_scene: PackedScene = null) -> void:
+func rpc_place_building(owner_peer_id: int, plot_index, card_id: int) -> void:
 	# Forward building placement broadcasts to the active scene which handles UI updates
 	print("dsdasdsda")
 	var scene = get_tree().get_current_scene()
 	if scene and scene.has_method("rpc_place_building"):
-		scene.rpc_place_building(owner_peer_id, plot_index, card_id, card_scene)
+		scene.rpc_place_building(owner_peer_id, plot_index, card_id)
 	else:
 		push_warning("No handler for rpc_place_building on current scene")
 
@@ -566,7 +569,7 @@ func request_use_card(owner_peer_id: int, _slot_index: int, _card_id: int, cost:
 	
 
 @rpc("any_peer", "reliable")
-func request_place_building(owner_peer_id: int, plot_index, card_id: int, scene: PackedScene) -> void:
+func request_place_building(owner_peer_id: int, plot_index, card_id: int) -> void:
 	print("[Network] request_place_building called")
 	var sender = multiplayer.get_remote_sender_id()
 
@@ -598,8 +601,8 @@ func request_place_building(owner_peer_id: int, plot_index, card_id: int, scene:
 	call_deferred("rpc_update_energies", player_energy)
 
 	print("[Network] broadcasting rpc_place_building")
-	rpc("rpc_place_building", owner_peer_id, plot_index, card_id, scene)
-	call_deferred("rpc_place_building", owner_peer_id, plot_index, card_id, scene)
+	rpc("rpc_place_building", owner_peer_id, plot_index, card_id)
+	call_deferred("rpc_place_building", owner_peer_id, plot_index, card_id)
 
 
 @rpc("any_peer", "reliable")

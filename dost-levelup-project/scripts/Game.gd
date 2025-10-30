@@ -155,15 +155,20 @@ func _connect_plot_slots() -> void:
 		print("Asads")
 		if btn:
 			var plot_idx = [int(i % 5), int(i / 5)] # assuming 5x5 grid
-			var callable = Callable(self, "_on_plot_pressed").bind(plot_idx)
+			btn.plot_index = plot_idx
+			btn.current_building = null
+			var callable = Callable(self, "_on_plot_pressed").bind(plot_idx, btn.is_occupied)
 			btn.pressed.connect(callable)
 
 # Handler when a plot is pressed by the local player
-func _on_plot_pressed(idx) -> void:
+func _on_plot_pressed(idx, is_occupied) -> void:
 	print("asdakdjadja")
 	var plot_index = idx
 	if player_cards.current_selected == -1:
 		print("[Game] No card selected to place")
+		return
+	if is_occupied:
+		print("[Game] Plot is already occupied")
 		return
 
 	var card_slot = local_hand.slots[player_cards.current_selected]
@@ -177,7 +182,7 @@ func _on_plot_pressed(idx) -> void:
 	# Request server to place building (server will validate and broadcast)
 	if Network:
 		print("this is reached or something lols")
-		Network.call_or_rpc_id(1, "request_place_building", [my_id, plot_index, card_id, card_slot.item.building_scene])
+		Network.call_or_rpc_id(1, "request_place_building", [my_id, plot_index, card_id])
 	# Locally remove the card and schedule replacement
 	local_hand.remove_from_slot(player_cards.current_selected)
 	# clear selection visuals
@@ -499,39 +504,63 @@ func get_selected_card_id():
 
 
 @rpc("any_peer", "reliable")
-func rpc_place_building(_owner_peer_id: int, plot_index, card_id: int, building_scene: PackedScene = null) -> void:
-	print("[Network] rpc_place_building called for owner", owner_peer_id)
-	
+func rpc_place_building(owner_peer_id: int, plot_index, card_id: int) -> void:
+	print("[Game] rpc_place_building called owner=%d plot=%s card=%d" % [owner_peer_id, str(plot_index), card_id])
+
 	var root = get_tree().get_current_scene()
 	if not root:
+		push_warning("[Game] rpc_place_building: no current scene")
 		return
 
-	# Determine which plot belongs to that owner
-	var player_plot: Node = null
-	if owner_peer_id == Multiplayer.get_unique_id():
-		# It's me
-		player_plot = root.get_node("PlayerPlot")
+	# Determine which plot node belongs to the owner_peer_id.
+	# Adjust node names to match your scene: PlayerPlot = local player's grid, OpponentPlot = other player's grid
+	var target_plot_node: Node = null
+	var my_id = multiplayer.get_unique_id()
+	if owner_peer_id == my_id:
+		if root.has_node("PlayerPlot"):
+			target_plot_node = root.get_node("PlayerPlot")
 	else:
-		# It's the opponent
+		# remote player's plot (opponent)
 		if root.has_node("OpponentPlot"):
-			player_plot = root.get_node("OpponentPlot")
+			target_plot_node = root.get_node("OpponentPlot")
 
-	# The rest of your placement logic
-	var container = player_plot
-	if player_plot.has_node("GridContainer"):
-		container = player_plot.get_node("GridContainer")
+	if target_plot_node == null:
+		push_warning("[Game] rpc_place_building: could not find plot node for owner %d" % owner_peer_id)
+		return
 
+	var container = target_plot_node
+	if target_plot_node.has_node("GridContainer"):
+		container = target_plot_node.get_node("GridContainer")
+
+	# Load the card resource locally and get its building_scene
+	var card_res_path = "res://cards/card_%d.tres" % card_id
+	if not ResourceLoader.exists(card_res_path):
+		push_warning("[Game] rpc_place_building: card resource not found: %s" % card_res_path)
+		return
+	var card_res = ResourceLoader.load(card_res_path)
+	if card_res == null:
+		push_warning("[Game] rpc_place_building: failed to load card resource %s" % card_res_path)
+		return
+
+	# Expect the Card resource to have a `building_scene` property (PackedScene)
+	var building_scene: PackedScene = null
+	building_scene = card_res.building_scene
+	
+	if building_scene == null:
+		push_warning("[Game] rpc_place_building: no building_scene defined on card %d" % card_id)
+		return
+
+	# Find the matching button by plot_index and instantiate the building under it
 	for i in range(container.get_child_count()):
 		var btn = container.get_child(i)
-		if btn:
-			var plot_idx = [int(i % 5), int(i / 5)]
-			if plot_idx == plot_index:
-				if building_scene != null:
-					var building_instance = building_scene.instantiate()
-					btn.add_child(building_instance)
-					btn.set("current_building", card_id)
-					btn.set("is_occupied", true)
-				else:
-					print("[rpc_place_building] No building scene for card", card_id)
-				break
-
+		if not btn:
+			continue
+		var plot_idx = [int(i % 5), int(i / 5)]
+		# element-wise compare to support arrays
+		if plot_idx.size() == plot_index.size() and int(plot_idx[0]) == int(plot_index[0]) and int(plot_idx[1]) == int(plot_index[1]):
+			var building_instance = building_scene.instantiate()
+			btn.add_child(building_instance)
+			btn.current_building = card_id
+			btn.is_occupied = true
+			print("[Game] Placed building for owner %d at %s (btn idx %d)" % [owner_peer_id, str(plot_index), i])
+			break
