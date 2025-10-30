@@ -15,8 +15,10 @@ var production_rate = 0
 var energy_consumption = 0
 var plot_index = [0,0] #this is the index of the current building
 var disabled = false 
+var disable_timer = 0
 
 #var level = 0
+@export var damage_popup_scene: PackedScene
 
 var owner_peer_id: int = 0
 
@@ -24,6 +26,45 @@ signal destroyed(owner_peer_id)
 
 func _init():
 	hp = max_hp
+
+func blackout():
+	await get_tree().create_timer(1).timeout
+	take_damage(10, "true")
+	disabled = true
+	disable_timer = 10.0
+
+	# Start a tween to fade to dark gray
+	var tween = get_tree().create_tween()
+	tween.tween_property(self, "modulate", Color(0.2, 0.2, 0.2, 1.0), 1.0) # fade to dark over 1s
+
+	# Wait for the 10s blackout duration
+	tween.tween_interval(10.0)
+
+	# Fade back to normal brightness over 1s
+	tween.tween_property(self, "modulate", Color(1, 1, 1, 1), 1.0)
+
+	# When the tween completes, re-enable building
+	tween.finished.connect(func ():
+		disabled = false
+		disable_timer = 0
+	)
+
+
+
+func _process(delta):
+	if disabled:
+		disable_timer -= delta
+		if disable_timer <= 0:
+			disabled = false
+			modulate = Color(1,1,1,1)
+		return
+
+		
+	trigger_effect()
+
+
+func trigger_effect():
+	pass
 
 func take_damage(amount: int, damage_type: String) -> void:
 	if damage_type == "fire":
@@ -36,8 +77,18 @@ func take_damage(amount: int, damage_type: String) -> void:
 		hp = max(0, hp - (amount * sturdiness))
 	else: 
 		hp = max(0, hp - amount)
-	if hp == 0:
+	if hp <= 0:
 		emit_signal("destroyed", owner_peer_id)
+
+	var popup := damage_popup_scene.instantiate()
+	get_tree().current_scene.add_child(popup)
+	var jitter_x := randf_range(-6, 6)
+	popup.show_damage(amount, global_position + Vector2(jitter_x, -20))
+
+	# Flash red
+	modulate = Color(1, 0, 0, 0.5)
+	await get_tree().create_timer(0.08).timeout
+	modulate = Color(1, 1, 1)
 
 func repair(amount: int) -> void:
 	hp = min(max_hp, hp + amount)

@@ -1,7 +1,8 @@
-[gd_scene load_steps=23 format=3 uid="uid://ce3xngesk7jhm"]
+[gd_scene load_steps=24 format=3 uid="uid://ce3xngesk7jhm"]
 
 [ext_resource type="Texture2D" uid="uid://8q6r1p7b1415" path="res://Assets/buildings/WaterPump_Station.png" id="1_jcmoc"]
 [ext_resource type="Script" uid="uid://bnxxn1bp5a1pi" path="res://buildings/water_pump.gd" id="2_tktok"]
+[ext_resource type="PackedScene" uid="uid://ds67jg2ay35um" path="res://UI/Damage/damage_popup.tscn" id="3_eqj6y"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jcmoc"]
 atlas = ExtResource("1_jcmoc")
@@ -149,5 +150,6 @@ position = Vector2(16, 10)
 scale = Vector2(0.328125, 0.328125)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 autoplay = "default"
-frame_progress = 0.31828
+frame_progress = 0.423084
 script = ExtResource("2_tktok")
+damage_popup_scene = ExtResource("3_eqj6y")

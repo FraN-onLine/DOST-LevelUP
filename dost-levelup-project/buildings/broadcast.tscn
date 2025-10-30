@@ -1,7 +1,8 @@
-[gd_scene load_steps=43 format=3 uid="uid://bxapsxcfenti2"]
+[gd_scene load_steps=44 format=3 uid="uid://bxapsxcfenti2"]
 
 [ext_resource type="Texture2D" uid="uid://caibej5bien4v" path="res://Assets/buildings/BroadCast_Tower.png" id="1_w3seh"]
 [ext_resource type="Script" uid="uid://b5cmy21fp6se6" path="res://buildings/broadcast.gd" id="2_w3seh"]
+[ext_resource type="PackedScene" uid="uid://ds67jg2ay35um" path="res://UI/Damage/damage_popup.tscn" id="3_fgu50"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fgu50"]
 atlas = ExtResource("1_w3seh")
@@ -289,5 +290,6 @@ position = Vector2(16, 10)
 scale = Vector2(0.328125, 0.328125)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 autoplay = "default"
-frame_progress = 0.507242
+frame_progress = 0.368397
 script = ExtResource("2_w3seh")
+damage_popup_scene = ExtResource("3_fgu50")

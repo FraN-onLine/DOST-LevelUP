@@ -1,6 +1,8 @@
-[gd_scene load_steps=28 format=3 uid="uid://donsu5iw65qqa"]
+[gd_scene load_steps=30 format=3 uid="uid://donsu5iw65qqa"]
 
 [ext_resource type="Texture2D" uid="uid://bl3vuuy3sxkjj" path="res://Assets/buildings/EquipmentGarage_Main.png" id="1_7tube"]
+[ext_resource type="Script" uid="uid://oinhn8jnh1hb" path="res://buildings/garage.gd" id="2_pd5kn"]
+[ext_resource type="PackedScene" uid="uid://ds67jg2ay35um" path="res://UI/Damage/damage_popup.tscn" id="3_by5wo"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pd5kn"]
 atlas = ExtResource("1_7tube")
@@ -191,4 +193,6 @@ scale = Vector2(0.351563, 0.341797)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 animation = &"new_animation"
 autoplay = "new_animation"
-frame_progress = 0.669302
+frame_progress = 0.602751
+script = ExtResource("2_pd5kn")
+damage_popup_scene = ExtResource("3_by5wo")

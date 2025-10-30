@@ -20,7 +20,7 @@ var ready_peers := {} # peer_id -> true when that peer has loaded the Game scene
 var player_energy := {} # peer_id -> int (server-authoritative energy values)
 var _energy_timer: Timer = null
 var card_pool := {} # id -> {path: String, name: String, frequency: int}
-@export var available_card_ids: Array = [1,2, 3] # list of card ids the server can draw from (set in inspector or code)
+@export var available_card_ids: Array = [1,2,3,9] # list of card ids the server can draw from (set in inspector or code)
 @export var card_back: Texture2D = null # optional explicit card back texture used for opponents
 
 # Programmatic helpers to control the available card pool at runtime
@@ -503,11 +503,14 @@ func rpc_place_building(owner_peer_id: int, plot_index, card_id: int) -> void:
 	# Forward building placement broadcasts to the active scene which handles UI updates
 	print("dsdasdsda")
 	var scene = get_tree().get_current_scene()
-	if scene and scene.has_method("rpc_place_building"):
-		scene.rpc_place_building(owner_peer_id, plot_index, card_id)
-	else:
-		push_warning("No handler for rpc_place_building on current scene")
-
+	scene.rpc_place_building(owner_peer_id, plot_index, card_id)
+	
+@rpc("any_peer", "reliable")
+func rpc_use_disaster(owner_peer_id: int, plot_index, card_id: int) -> void:
+	# Forward the disaster shi sa sceenee
+	print("dsdasdsda")
+	var scene = get_tree().get_current_scene()
+	scene.rpc_use_disaster(owner_peer_id, plot_index, card_id)
 
 
 # Server-side periodic energy updates
@@ -604,12 +607,14 @@ func request_place_building(owner_peer_id: int, plot_index, card_id: int) -> voi
 	rpc("rpc_place_building", owner_peer_id, plot_index, card_id)
 	call_deferred("rpc_place_building", owner_peer_id, plot_index, card_id)
 
+@rpc("any_peer", "reliable")
 func request_use_disaster (owner_peer_id: int, plot_index, card_id: int) -> void:
 	print("requsedis called")
 	var sender = multiplayer.get_remote_sender_id()
 
 	# allow server self-call (sender==0)
 	if sender != 0 and sender != owner_peer_id:
+		print("huh")
 		push_warning("Player %d attempted to place for owner %d" % [sender, owner_peer_id])
 		return
 

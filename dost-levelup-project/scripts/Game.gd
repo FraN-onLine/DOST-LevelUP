@@ -216,7 +216,7 @@ func _on_plot_pressed(idx, btn) -> void:
 	selected_card_id = null
 
 func _on_enemy_plot_pressed(idx, btn) -> void:
-	if not player_cards.current_selected_type == "disaster":
+	if not player_cards.current_selected_type == "Disaster":
 		print("not a disaster lols")
 		return
 
@@ -237,7 +237,7 @@ func _on_enemy_plot_pressed(idx, btn) -> void:
 	# Request server to place building (server will validate and broadcast)
 	if Network:
 		print("this is reached or something lols")
-		Network.call_or_rpc_id(1, "request_use_disaster", [_get_opponent_peer_id(), plot_index, card_id])
+		Network.call_or_rpc_id(1, "request_use_disaster", [my_id, plot_index, card_id])
 	# Locally remove the card and schedule replacement
 	local_hand.remove_from_slot(player_cards.current_selected)
 	# clear selection visuals
@@ -536,7 +536,7 @@ func rpc_place_building(owner_peer_id: int, plot_index, card_id: int) -> void:
 			break
 
 @rpc("any_peer", "reliable")
-func rpc_trigger_disaster(owner_peer_id: int, plot_index, card_id: int) -> void:
+func rpc_use_disaster(owner_peer_id: int, plot_index, card_id: int) -> void:
 	print("[Game] Disaster triggered by %d at plot %s" % [owner_peer_id, str(plot_index)])
 
 	var root = get_tree().get_current_scene()
@@ -559,6 +559,18 @@ func rpc_trigger_disaster(owner_peer_id: int, plot_index, card_id: int) -> void:
 		push_warning("Could not find target plot for disaster.")
 		return
 
+	# Load the card resource locally and get its building_scene
+	var card_res_path = "res://cards/card_%d.tres" % card_id
+	if not ResourceLoader.exists(card_res_path):
+		push_warning("[Game] rpc_place_building: card resource not found: %s" % card_res_path)
+		return
+	var card_res = ResourceLoader.load(card_res_path)
+	if card_res == null:
+		push_warning("[Game] rpc_place_building: failed to load card resource %s" % card_res_path)
+		return
+
+	var disaster_scene = card_res.disaster_scene
+
 	# Example effect: destroy or damage all buildings in target plot cell
 	var container = target_plot.get_node("GridContainer")
 
@@ -566,13 +578,12 @@ func rpc_trigger_disaster(owner_peer_id: int, plot_index, card_id: int) -> void:
 		var btn = container.get_child(i)
 		if not btn:
 			continue
-
+			
 		var plot_idx = [int(i % 5), int(i / 5)]
+		# element-wise compare to support arrays
 		if plot_idx.size() == plot_index.size() and int(plot_idx[0]) == int(plot_index[0]) and int(plot_idx[1]) == int(plot_index[1]):
-			# Found target cell → apply damage or remove building
-			for c in btn.get_children():
-				if c and c.name.begins_with("Building"): # optional filter
-					print("[Game] Destroying building at %s" % str(plot_index))
-					c.queue_free()
-					break
+			var disaster_instance = disaster_scene.instantiate()
+			btn.add_child(disaster_instance)
+			btn.trigger_disaster(card_id, disaster_instance)
+			print("lol disaster go boogsh")
 			break
