@@ -176,6 +176,7 @@ func _on_plot_pressed(idx) -> void:
 		return
 	# Request server to place building (server will validate and broadcast)
 	if Network:
+		print("this")
 		Network.request_place_building(my_id, plot_index, card_id, card_slot.item.building_scene)
 	# Locally remove the card and schedule replacement
 	local_hand.remove_from_slot(player_cards.current_selected)
@@ -499,6 +500,7 @@ func get_selected_card_id():
 
 @rpc("any_peer", "reliable")
 func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int, building_scene: PackedScene = null) -> void:
+	print("placed")
 	# Server broadcast: update the UI for the player by placing the appropriate building
 	var root = get_tree().get_current_scene()
 	if not root:

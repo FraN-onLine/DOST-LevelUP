@@ -102,7 +102,7 @@ func start_host(port: int = DEFAULT_PORT) -> void:
 	# Print current available_card_ids so user knows what the server will draw from
 	print("[Network] available_card_ids = %s (count=%d)" % [available_card_ids, available_card_ids.size()])
 	# initialize energy for host
-	player_energy[host_id] = 0
+	player_energy[host_id] = 3
 	broadcast_player_list()
 	
 	print("Server started on port %d" % port)
@@ -151,7 +151,7 @@ func _on_peer_connected(id: int) -> void:
 		# Assign a default name and broadcast
 		players[id] = "Player %d" % id
 		# initialize energy for the new player
-		player_energy[id] = 0
+		player_energy[id] = 3
 		broadcast_player_list()
 	emit_signal("player_joined", id)
 
@@ -490,6 +490,7 @@ func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void
 @rpc("any_peer", "reliable")
 func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int , card_scene: PackedScene = null) -> void:
 	# Forward building placement broadcasts to the active scene which handles UI updates
+	print("dsdasdsda")
 	var scene = get_tree().get_current_scene()
 	if scene and scene.has_method("rpc_place_building"):
 		scene.rpc_place_building(owner_peer_id, plot_index, card_id, card_scene)
@@ -557,9 +558,7 @@ func request_use_card(owner_peer_id: int, _slot_index: int, _card_id: int, cost:
 
 @rpc("any_peer", "reliable")
 func request_place_building(owner_peer_id: int, plot_index, card_id: int, scene: PackedScene) -> void:
-	# Client requests server to place a building for owner_peer_id at plot_index using card_id
-	if not multiplayer.is_server():
-		return
+	print("called place building")
 	var sender = multiplayer.get_remote_sender_id()
 	# only allow sender to request for their own player
 	if sender != owner_peer_id:
