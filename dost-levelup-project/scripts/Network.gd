@@ -570,7 +570,7 @@ func request_use_card(owner_peer_id: int, _slot_index: int, _card_id: int, cost:
 
 @rpc("any_peer", "reliable")
 func request_place_building(owner_peer_id: int, plot_index, card_id: int) -> void:
-	print("[Network] request_place_building called")
+	print("request_place_building called")
 	var sender = multiplayer.get_remote_sender_id()
 
 	# allow server self-call (sender==0)
@@ -603,6 +603,41 @@ func request_place_building(owner_peer_id: int, plot_index, card_id: int) -> voi
 	print("[Network] broadcasting rpc_place_building")
 	rpc("rpc_place_building", owner_peer_id, plot_index, card_id)
 	call_deferred("rpc_place_building", owner_peer_id, plot_index, card_id)
+
+func request_use_disaster (owner_peer_id: int, plot_index, card_id: int) -> void:
+	print("requsedis called")
+	var sender = multiplayer.get_remote_sender_id()
+
+	# allow server self-call (sender==0)
+	if sender != 0 and sender != owner_peer_id:
+		push_warning("Player %d attempted to place for owner %d" % [sender, owner_peer_id])
+		return
+
+	# ensure energy entry exists
+	if not player_energy.has(owner_peer_id):
+		player_energy[owner_peer_id] = 10
+
+	# load cost
+	var cost = 1
+	var res_path = "res://cards/card_%d.tres" % int(card_id)
+	if ResourceLoader.exists(res_path):
+		var cre = ResourceLoader.load(res_path)
+		cost = int(cre.cost)
+
+	var current_energy = player_energy.get(owner_peer_id, 0)
+	if current_energy < cost:
+		print("[Network] not enough energy for", owner_peer_id)
+		rpc_id(owner_peer_id, "rpc_place_failed", plot_index, card_id, "not_enough_energy")
+		return
+
+	player_energy[owner_peer_id] = max(0, current_energy - cost)
+	print("[Network] energy reduced:", player_energy)
+	rpc("rpc_update_energies", player_energy)
+	call_deferred("rpc_update_energies", player_energy)
+
+	print("[Network] broadcasting rpc_use_disaster")
+	rpc("rpc_use_disaster", owner_peer_id, plot_index, card_id)
+	call_deferred("rpc_use_disaster", owner_peer_id, plot_index, card_id)
 
 
 @rpc("any_peer", "reliable")

@@ -14,6 +14,7 @@ var attack = 0
 var production_rate = 0
 var energy_consumption = 0
 var plot_index = [0,0] #this is the index of the current building
+var disabled = false 
 
 #var level = 0
 

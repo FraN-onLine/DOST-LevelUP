@@ -23,6 +23,10 @@ Network="*res://scripts/Network.gd"
 
 window/stretch/mode="viewport"
 
+[global_group]
+
+buildings=""
+
 [input]
 
 move_left={

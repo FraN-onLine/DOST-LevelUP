@@ -10,3 +10,4 @@ class_name Card
 @export var cost: int
 @export var card_frequency: int
 @export var building_scene: PackedScene
+@export var disaster_scene: PackedScene

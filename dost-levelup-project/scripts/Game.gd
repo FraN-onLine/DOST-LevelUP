@@ -157,6 +157,7 @@ func _connect_plot_slots() -> void:
 			btn.current_building = null
 			var callable = Callable(self, "_on_plot_pressed").bind(plot_idx, btn)
 			btn.pressed.connect(callable)
+	
 	var opponent_plot = $OpponentPlot
 	container = opponent_plot.get_node("GridContainer")
 	for i in range(container.get_child_count()):
@@ -173,6 +174,9 @@ func _connect_plot_slots() -> void:
 
 # Handler when a plot is pressed by the local player
 func _on_plot_pressed(idx, btn) -> void:
+	if not player_cards.current_selected_type == "Building":
+		print("not a building lols")
+		return
 
 	print("asdakdjadja")
 	var plot_index = idx
@@ -212,14 +216,14 @@ func _on_plot_pressed(idx, btn) -> void:
 	selected_card_id = null
 
 func _on_enemy_plot_pressed(idx, btn) -> void:
+	if not player_cards.current_selected_type == "disaster":
+		print("not a disaster lols")
+		return
 
 	print("asdakdjadja")
 	var plot_index = idx
 	if player_cards.current_selected == -1:
-		print("[Game] No card selected to place")
-		return
-	if btn.is_occupied:
-		print("[Game] Plot is already occupied")
+		print("No card selected to place")
 		return
 
 	var card_slot = local_hand.slots[player_cards.current_selected]
@@ -228,12 +232,12 @@ func _on_enemy_plot_pressed(idx, btn) -> void:
 	var card_cost = card_slot.item.cost
 	var current_energy = Network.player_energy.get(my_id, 0)
 	if current_energy < card_cost:
-		print("[Game] Not enough energy to place building %d", current_energy)
+		print("Not enough energy to place building %d", current_energy)
 		return
 	# Request server to place building (server will validate and broadcast)
 	if Network:
 		print("this is reached or something lols")
-		Network.call_or_rpc_id(1, "request_place_building", [my_id, plot_index, card_id])
+		Network.call_or_rpc_id(1, "request_use_disaster", [_get_opponent_peer_id(), plot_index, card_id])
 	# Locally remove the card and schedule replacement
 	local_hand.remove_from_slot(player_cards.current_selected)
 	# clear selection visuals

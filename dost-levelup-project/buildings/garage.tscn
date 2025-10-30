@@ -185,10 +185,10 @@ animations = [{
 "speed": 8.0
 }]
 
-[node name="Garage" type="AnimatedSprite2D"]
+[node name="Garage" type="AnimatedSprite2D" groups=["buildings"]]
 position = Vector2(15, 8)
 scale = Vector2(0.351563, 0.341797)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 animation = &"new_animation"
 autoplay = "new_animation"
-frame_progress = 0.981804
+frame_progress = 0.669302
