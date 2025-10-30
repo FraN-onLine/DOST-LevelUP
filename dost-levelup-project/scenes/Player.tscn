@@ -6,6 +6,7 @@
 script = ExtResource("1")
 
 [node name="Cards" type="HBoxContainer" parent="."]
+visible = false
 
 [node name="LabelPlaceholder" type="Label" parent="Cards"]
 layout_mode = 2

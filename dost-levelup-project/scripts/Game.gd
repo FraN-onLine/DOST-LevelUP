@@ -154,7 +154,7 @@ func _connect_plot_slots() -> void:
 		# bind them with their index [0,0 to 4,4]
 		print("Asads")
 		if btn:
-			var plot_idx = [i % 5, i / 5] # assuming 5x5 grid
+			var plot_idx = [int(i % 5), int(i / 5)] # assuming 5x5 grid
 			var callable = Callable(self, "_on_plot_pressed").bind(plot_idx)
 			btn.pressed.connect(callable)
 
@@ -172,12 +172,12 @@ func _on_plot_pressed(idx) -> void:
 	var card_cost = card_slot.item.cost
 	var current_energy = Network.player_energy.get(my_id, 0)
 	if current_energy < card_cost:
-		print("[Game] Not enough energy to place building")
+		print("[Game] Not enough energy to place building %d", current_energy)
 		return
 	# Request server to place building (server will validate and broadcast)
 	if Network:
-		print("this")
-		Network.request_place_building(my_id, plot_index, card_id, card_slot.item.building_scene)
+		print("this is reached or something lols")
+		Network.call_or_rpc_id(1, "request_place_building", [my_id, plot_index, card_id, card_slot.item.building_scene])
 	# Locally remove the card and schedule replacement
 	local_hand.remove_from_slot(player_cards.current_selected)
 	# clear selection visuals
@@ -499,7 +499,7 @@ func get_selected_card_id():
 
 
 @rpc("any_peer", "reliable")
-func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int, building_scene: PackedScene = null) -> void:
+func rpc_place_building(owner_peer_id: int, plot_index, card_id: int, building_scene: PackedScene = null) -> void:
 	print("placed")
 	# Server broadcast: update the UI for the player by placing the appropriate building
 	var root = get_tree().get_current_scene()
@@ -519,7 +519,7 @@ func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int, build
 		var btn = container.get_child(i)
 		# bind them with their index [0,0 to 4,4]
 		if btn:
-			var plot_idx = [i % 5, i / 5] # assuming 5x5 grid
+			var plot_idx = [int(i % 5), int(i / 5)] # assuming 5x5 grid
 			if plot_idx == plot_index:
 				# Found the correct plot button
 				if building_scene != null:

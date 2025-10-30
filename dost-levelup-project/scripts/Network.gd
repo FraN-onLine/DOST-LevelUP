@@ -59,6 +59,10 @@ func call_or_rpc_id(target_peer: int, method_name: String, args: Array = []) -> 
 					call_deferred(method_name, args[0], args[1])
 				3:
 					call_deferred(method_name, args[0], args[1], args[2])
+				4:
+					call_deferred(method_name, args[0], args[1], args[2], args[3])
+				5:
+					call_deferred(method_name, args[0], args[1], args[2], args[3], args[4])
 				_:
 					# Fallback: pass the args array as single parameter
 					call_deferred(method_name, args)
@@ -76,6 +80,10 @@ func call_or_rpc_id(target_peer: int, method_name: String, args: Array = []) -> 
 				rpc_id(target_peer, method_name, args[0], args[1])
 			3:
 				rpc_id(target_peer, method_name, args[0], args[1], args[2])
+			4:
+				rpc_id(target_peer, method_name, args[0], args[1], args[2], args[3])
+			5:
+				rpc_id(target_peer, method_name, args[0], args[1], args[2], args[3], args[4])
 			_:
 				# Generic fallback for more args
 				rpc_id(target_peer, method_name, args)
@@ -259,7 +267,7 @@ func deal_and_start_game(game_scene_path: String = "res://scenes/Game.tscn") -> 
 	player_energy.clear()
 	for peer_id in players.keys():
 		player_hands[peer_id] = []
-		player_energy[peer_id] = 0
+		player_energy[peer_id] = 3
 
 	# Deal 3 cards each by sampling from `available_card_ids` (set by user).
 	var cards_per_player := 3
@@ -488,7 +496,7 @@ func rpc_reveal_public_card(peer_id: int, slot_index: int, card_id: int) -> void
 
 
 @rpc("any_peer", "reliable")
-func rpc_place_building(owner_peer_id: int, plot_index: int, card_id: int , card_scene: PackedScene = null) -> void:
+func rpc_place_building(owner_peer_id: int, plot_index, card_id: int , card_scene: PackedScene = null) -> void:
 	# Forward building placement broadcasts to the active scene which handles UI updates
 	print("dsdasdsda")
 	var scene = get_tree().get_current_scene()
@@ -523,6 +531,7 @@ func _on_energy_timer_timeout() -> void:
 	for peer_id in players.keys():
 		if not player_energy.has(peer_id):
 			player_energy[peer_id] = 0
+			print("Initialized energy for player %d" % peer_id)
 		# Clamp energy to a maximum of 10 (adjustable)
 		var max_energy = 10
 		player_energy[peer_id] = min(player_energy[peer_id] + 1, max_energy)
@@ -558,35 +567,46 @@ func request_use_card(owner_peer_id: int, _slot_index: int, _card_id: int, cost:
 
 @rpc("any_peer", "reliable")
 func request_place_building(owner_peer_id: int, plot_index, card_id: int, scene: PackedScene) -> void:
-	print("called place building")
+	print("[Network] request_place_building called")
 	var sender = multiplayer.get_remote_sender_id()
-	# only allow sender to request for their own player
-	if sender != owner_peer_id:
+
+	# allow server self-call (sender==0)
+	if sender != 0 and sender != owner_peer_id:
 		push_warning("Player %d attempted to place for owner %d" % [sender, owner_peer_id])
 		return
-	# Validate cost from card resource (default 1)
+
+	# ensure energy entry exists
+	if not player_energy.has(owner_peer_id):
+		player_energy[owner_peer_id] = 10
+
+	# load cost
 	var cost = 1
 	var res_path = "res://cards/card_%d.tres" % int(card_id)
 	if ResourceLoader.exists(res_path):
 		var cre = ResourceLoader.load(res_path)
-		if cre and cre is Resource and cre.has_property("cost"):
-			cost = int(cre.cost)
-	# Check energy
+		cost = int(cre.cost)
+
 	var current_energy = player_energy.get(owner_peer_id, 0)
 	if current_energy < cost:
+		print("[Network] not enough energy for", owner_peer_id)
 		rpc_id(owner_peer_id, "rpc_place_failed", plot_index, card_id, "not_enough_energy")
 		return
-	# Deduct energy and broadcast update
+
 	player_energy[owner_peer_id] = max(0, current_energy - cost)
+	print("[Network] energy reduced:", player_energy)
 	rpc("rpc_update_energies", player_energy)
 	call_deferred("rpc_update_energies", player_energy)
-	# Broadcast placement to all peers so they can instantiate the building locally
+
+	print("[Network] broadcasting rpc_place_building")
 	rpc("rpc_place_building", owner_peer_id, plot_index, card_id, scene)
 	call_deferred("rpc_place_building", owner_peer_id, plot_index, card_id, scene)
 
 
 @rpc("any_peer", "reliable")
 func rpc_update_energies(energies: Dictionary) -> void:
+	player_energy = energies
+	print("[Network] Synced player_energy:", player_energy)
+
 	var scene = get_tree().get_current_scene()
 	if scene and scene.has_method("rpc_update_energies"):
 		scene.rpc_update_energies(energies)

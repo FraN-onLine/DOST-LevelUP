@@ -186,6 +186,8 @@ animations = [{
 }]
 
 [node name="Garage" type="AnimatedSprite2D"]
+position = Vector2(3, 2)
+scale = Vector2(0.078125, 0.0791015)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 animation = &"new_animation"
-frame_progress = 0.380948
+frame_progress = 0.158936
