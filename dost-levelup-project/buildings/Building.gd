@@ -4,6 +4,8 @@ class_name Building
 
 @export var max_hp: int = 100
 var hp: int
+@onready var health_bar = $Healthbar
+var hp_not_init = true
 
 # 1 is full damage, if they resist will be lower
 var fire_resistance = 1 
@@ -52,6 +54,11 @@ func blackout():
 
 
 func _process(delta):
+	if health_bar and hp_not_init:
+		health_bar.init_health(max_hp)
+		print("initialized health")
+		hp_not_init = false
+		
 	if disabled:
 		disable_timer -= delta
 		if disable_timer <= 0:
@@ -67,6 +74,7 @@ func trigger_effect():
 	pass
 
 func take_damage(amount: int, damage_type: String) -> void:
+	
 	if damage_type == "fire":
 		hp = max(0, hp - (amount * fire_resistance))
 	elif damage_type == "water":
@@ -77,6 +85,7 @@ func take_damage(amount: int, damage_type: String) -> void:
 		hp = max(0, hp - (amount * sturdiness))
 	else: 
 		hp = max(0, hp - amount)
+	health_bar.value = hp
 	if hp <= 0:
 		emit_signal("destroyed", owner_peer_id)
 
@@ -86,9 +95,10 @@ func take_damage(amount: int, damage_type: String) -> void:
 	popup.show_damage(amount, global_position + Vector2(jitter_x, -20))
 
 	# Flash red
-	modulate = Color(1, 0, 0, 0.5)
-	await get_tree().create_timer(0.08).timeout
-	modulate = Color(1, 1, 1)
+	if not disabled:
+		modulate = Color(1, 0, 0, 0.5)
+		await get_tree().create_timer(0.08).timeout
+		modulate = Color(1, 1, 1)
 
 func repair(amount: int) -> void:
 	hp = min(max_hp, hp + amount)

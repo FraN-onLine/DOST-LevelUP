@@ -34,8 +34,3 @@ func request_water(amount: float) -> float:
 # Returns current water level (for UI display)
 func get_water_level() -> float:
 	return stored_water
-
-#func take_damage(amount):
-#	hp -= amount
-#	if hp <= 0:
-#		queue_free()

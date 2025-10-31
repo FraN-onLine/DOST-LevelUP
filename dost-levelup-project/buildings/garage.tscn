@@ -1,8 +1,9 @@
-[gd_scene load_steps=30 format=3 uid="uid://donsu5iw65qqa"]
+[gd_scene load_steps=31 format=3 uid="uid://donsu5iw65qqa"]
 
 [ext_resource type="Texture2D" uid="uid://bl3vuuy3sxkjj" path="res://Assets/buildings/EquipmentGarage_Main.png" id="1_7tube"]
 [ext_resource type="Script" uid="uid://oinhn8jnh1hb" path="res://buildings/garage.gd" id="2_pd5kn"]
 [ext_resource type="PackedScene" uid="uid://ds67jg2ay35um" path="res://UI/Damage/damage_popup.tscn" id="3_by5wo"]
+[ext_resource type="PackedScene" uid="uid://ygi0h704mijm" path="res://UI/Healthbar/healthbar-building.tscn" id="4_semws"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pd5kn"]
 atlas = ExtResource("1_7tube")
@@ -196,3 +197,9 @@ autoplay = "new_animation"
 frame_progress = 0.602751
 script = ExtResource("2_pd5kn")
 damage_popup_scene = ExtResource("3_by5wo")
+
+[node name="Healthbar" parent="." instance=ExtResource("4_semws")]
+offset_left = -31.2888
+offset_top = 61.44
+offset_right = 35.7112
+offset_bottom = 79.44

@@ -1,8 +1,9 @@
-[gd_scene load_steps=44 format=3 uid="uid://bxapsxcfenti2"]
+[gd_scene load_steps=45 format=3 uid="uid://bxapsxcfenti2"]
 
 [ext_resource type="Texture2D" uid="uid://caibej5bien4v" path="res://Assets/buildings/BroadCast_Tower.png" id="1_w3seh"]
 [ext_resource type="Script" uid="uid://b5cmy21fp6se6" path="res://buildings/broadcast.gd" id="2_w3seh"]
 [ext_resource type="PackedScene" uid="uid://ds67jg2ay35um" path="res://UI/Damage/damage_popup.tscn" id="3_fgu50"]
+[ext_resource type="PackedScene" uid="uid://ygi0h704mijm" path="res://UI/Healthbar/healthbar-building.tscn" id="4_a811v"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_fgu50"]
 atlas = ExtResource("1_w3seh")
@@ -285,7 +286,7 @@ animations = [{
 "speed": 14.0
 }]
 
-[node name="WaterPump" type="AnimatedSprite2D" groups=["buildings"]]
+[node name="Broadcast" type="AnimatedSprite2D" groups=["buildings"]]
 position = Vector2(16, 10)
 scale = Vector2(0.328125, 0.328125)
 sprite_frames = SubResource("SpriteFrames_3mswn")
@@ -293,3 +294,9 @@ autoplay = "default"
 frame_progress = 0.368397
 script = ExtResource("2_w3seh")
 damage_popup_scene = ExtResource("3_fgu50")
+
+[node name="Healthbar" parent="." instance=ExtResource("4_a811v")]
+offset_left = -30.0
+offset_top = 61.0
+offset_right = 37.0
+offset_bottom = 79.0

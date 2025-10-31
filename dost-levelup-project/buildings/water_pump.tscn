@@ -1,8 +1,9 @@
-[gd_scene load_steps=24 format=3 uid="uid://ce3xngesk7jhm"]
+[gd_scene load_steps=25 format=3 uid="uid://ce3xngesk7jhm"]
 
 [ext_resource type="Texture2D" uid="uid://8q6r1p7b1415" path="res://Assets/buildings/WaterPump_Station.png" id="1_jcmoc"]
 [ext_resource type="Script" uid="uid://bnxxn1bp5a1pi" path="res://buildings/water_pump.gd" id="2_tktok"]
 [ext_resource type="PackedScene" uid="uid://ds67jg2ay35um" path="res://UI/Damage/damage_popup.tscn" id="3_eqj6y"]
+[ext_resource type="PackedScene" uid="uid://ygi0h704mijm" path="res://UI/Healthbar/healthbar-building.tscn" id="4_msvs2"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jcmoc"]
 atlas = ExtResource("1_jcmoc")
@@ -153,3 +154,9 @@ autoplay = "default"
 frame_progress = 0.423084
 script = ExtResource("2_tktok")
 damage_popup_scene = ExtResource("3_eqj6y")
+
+[node name="Healthbar" parent="." instance=ExtResource("4_msvs2")]
+offset_left = -33.5238
+offset_top = 60.9524
+offset_right = 33.4762
+offset_bottom = 78.9524

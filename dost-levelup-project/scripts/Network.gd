@@ -2,7 +2,6 @@ extends Node
 
 const DEFAULT_IP := "localhost"
 const DEFAULT_PORT := 12345
-# Editable maximum players (default 2). Exported so it can be changed in the singleton's inspector if desired.
 @export var MAX_PLAYERS: int = 2
 
 signal player_joined(peer_id)

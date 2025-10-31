@@ -212,7 +212,7 @@ func _on_plot_pressed(idx, btn) -> void:
 	var timer = get_tree().create_timer(3.0)
 	timer.timeout.connect(_replace_card.bind(player_cards.current_selected))
 	_populate_card_holder(player_cards, [], true)
-	player_cards.current_selected = -1
+	player_cards.deselect_other_slots(-1)
 	selected_card_id = null
 
 func _on_enemy_plot_pressed(idx, btn) -> void:
@@ -251,7 +251,7 @@ func _on_enemy_plot_pressed(idx, btn) -> void:
 	var timer = get_tree().create_timer(3.0)
 	timer.timeout.connect(_replace_card.bind(player_cards.current_selected))
 	_populate_card_holder(player_cards, [], true)
-	player_cards.current_selected = -1
+	player_cards.deselect_other_slots(-1)
 	selected_card_id = null
 
 func _get_opponent_peer_id() -> int:
@@ -526,12 +526,12 @@ func rpc_place_building(owner_peer_id: int, plot_index, card_id: int) -> void:
 		if not btn:
 			continue
 		var plot_idx = [int(i % 5), int(i / 5)]
-		# element-wise compare to support arrays
 		if plot_idx.size() == plot_index.size() and int(plot_idx[0]) == int(plot_index[0]) and int(plot_idx[1]) == int(plot_index[1]):
 			var building_instance = building_scene.instantiate()
 			btn.add_child(building_instance)
 			btn.current_building = card_id
 			btn.is_occupied = true
+			btn.building_scene = building_instance
 			print("[Game] Placed building for owner %d at %s (btn idx %d)" % [owner_peer_id, str(plot_index), i])
 			break
 

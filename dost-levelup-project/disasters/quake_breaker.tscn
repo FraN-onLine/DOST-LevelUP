@@ -341,6 +341,9 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_a0x7i")
+}, {
+"duration": 1.0,
+"texture": null
 }],
 "loop": false,
 "name": &"default",
@@ -349,9 +352,10 @@ animations = [{
 
 [node name="quake_breaker" type="AnimatedSprite2D"]
 z_index = 2
-position = Vector2(1, 1)
-scale = Vector2(0.898438, 0.941406)
+position = Vector2(8, -30)
+scale = Vector2(1.5293, 1.82031)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 autoplay = "default"
-frame_progress = 0.561331
+frame = 48
+frame_progress = 1.0
 script = ExtResource("2_f4rju")
