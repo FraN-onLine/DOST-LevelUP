@@ -23,16 +23,20 @@ func trigger_effect(delta: float) -> void:
 		var tile = get_parent().get_parent().get_parent().get_tile_at([plot_index[0],plot_index[1] + 1])
 		if tile:
 			if tile.building_scene:
+				print("heal")
 				tile.building_scene.repair_building(10)
 		tile = get_parent().get_parent().get_parent().get_tile_at([plot_index[0],plot_index[1] - 1])
 		if tile:
 			if tile.building_scene:
+				print("heal")
 				tile.building_scene.repair_building(10)
 		tile = get_parent().get_parent().get_parent().get_tile_at([plot_index[0] + 1,plot_index[1]])
 		if tile:
 			if tile.building_scene:
+				print("heal")
 				tile.building_scene.repair_building(10)
 		tile = get_parent().get_parent().get_parent().get_tile_at([plot_index[0] - 1,plot_index[1]])
 		if tile:
 			if tile.building_scene:
+				print("heal")
 				tile.building_scene.repair_building(10)

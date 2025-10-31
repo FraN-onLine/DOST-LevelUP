@@ -341,10 +341,10 @@ offset_bottom = 79.0
 
 [node name="Inactive" type="Label" parent="."]
 visible = false
-offset_left = -39.8222
-offset_top = -67.2914
-offset_right = 40.1778
-offset_bottom = -39.2914
+offset_left = -39.8221
+offset_top = -80.5114
+offset_right = 40.1779
+offset_bottom = -52.5114
 theme_override_fonts/font = ExtResource("5_pabux")
 theme_override_font_sizes/font_size = 16
 text = "Inactive"

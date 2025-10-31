@@ -22,6 +22,7 @@ var inactive = false
 
 #var level = 0
 @export var damage_popup_scene: PackedScene
+var popup
 
 var owner_peer_id: int = 0
 
@@ -109,7 +110,7 @@ func take_damage(amount: int, damage_type: String) -> void:
 		$Inactive.visible = true
 		emit_signal("destroyed", owner_peer_id)
 
-	var popup := damage_popup_scene.instantiate()
+	popup = damage_popup_scene.instantiate()
 	get_tree().current_scene.add_child(popup)
 	var jitter_x := randf_range(-6, 6)
 	popup.show_damage(amount, global_position + Vector2(jitter_x, -20))
@@ -123,9 +124,10 @@ func take_damage(amount: int, damage_type: String) -> void:
 func repair_building(amount: int) -> void:
 	if inactive:
 		return
-	var popup := damage_popup_scene.instantiate()
+		
+	popup = damage_popup_scene.instantiate()
 	get_tree().current_scene.add_child(popup)
-	pop_up.get_node("Label").add_color_override("font_color", Color(0, 1, 0))
+	popup.get_node("Label").add_color_override("font_color", Color(0, 1, 0))
 	var jitter_x := randf_range(-6, 6)
 	popup.show_damage(amount, global_position + Vector2(jitter_x, -20))
 
