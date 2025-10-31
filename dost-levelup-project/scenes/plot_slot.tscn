@@ -1,14 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://dbyrtjs0ruycc"]
+[gd_scene load_steps=2 format=3 uid="uid://dbyrtjs0ruycc"]
 
 [ext_resource type="Script" uid="uid://bkw3188x2dtok" path="res://scripts/plot_slot.gd" id="1_4dmsh"]
-[ext_resource type="Texture2D" uid="uid://fpb5qgcfkhrg" path="res://Assets/landscape/map-grass1.png" id="1_7c8nn"]
 
 [node name="PlotSlot" type="TextureButton"]
+custom_minimum_size = Vector2(64, 64)
 anchors_preset = -1
 anchor_right = 0.003
 anchor_bottom = 0.005
 offset_right = 28.544
 offset_bottom = 28.76
 scale = Vector2(0.1, 0.1)
-texture_normal = ExtResource("1_7c8nn")
+ignore_texture_size = true
 script = ExtResource("1_4dmsh")
