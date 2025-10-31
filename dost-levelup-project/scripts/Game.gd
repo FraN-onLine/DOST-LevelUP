@@ -5,11 +5,13 @@ extends Control
 
 @onready var player_cards = $PlayerCards
 @onready var opponent_cards = $OpponentCards
+@onready var timer_label = $Label
 var local_hand: Hand = null
 var card_pool_meta := {}
 var revealed_cards := {} # peer_id -> { slot_index: card_id }
 var selected_card_id = null
 var selected_card_slot_index = null
+var seconds_passed = 0
 @export var card_reveal_duration := 1.0 # Duration in seconds to show revealed cards
 
 func _ready():
@@ -587,3 +589,9 @@ func rpc_use_disaster(owner_peer_id: int, plot_index, card_id: int) -> void:
 			btn.trigger_disaster(card_id, disaster_instance)
 			print("lol disaster go boogsh")
 			break
+
+func _on_timer_timeout():
+	seconds_passed += 1
+	var minutes = seconds_passed / 60
+	var seconds = seconds_passed % 60
+	timer_label.text = "Time: %02d:%02d" % [minutes, seconds]

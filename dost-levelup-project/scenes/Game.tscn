@@ -129,9 +129,19 @@ autoplay = "default"
 frame_progress = 0.669471
 
 [node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="."]
-visible = false
 position = Vector2(1110, 606)
 scale = Vector2(0.871429, 0.871429)
 sprite_frames = SubResource("SpriteFrames_3xj3m")
 autoplay = "default"
 frame_progress = 0.44364
+
+[node name="Label" type="Label" parent="."]
+offset_left = 536.0
+offset_top = 22.0
+offset_right = 576.0
+offset_bottom = 45.0
+
+[node name="Timer" type="Timer" parent="."]
+autostart = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
