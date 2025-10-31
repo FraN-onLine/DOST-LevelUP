@@ -1,9 +1,10 @@
-[gd_scene load_steps=25 format=3 uid="uid://ce3xngesk7jhm"]
+[gd_scene load_steps=29 format=3 uid="uid://ce3xngesk7jhm"]
 
 [ext_resource type="Texture2D" uid="uid://8q6r1p7b1415" path="res://Assets/buildings/WaterPump_Station.png" id="1_jcmoc"]
 [ext_resource type="Script" uid="uid://bnxxn1bp5a1pi" path="res://buildings/water_pump.gd" id="2_tktok"]
 [ext_resource type="PackedScene" uid="uid://ds67jg2ay35um" path="res://UI/Damage/damage_popup.tscn" id="3_eqj6y"]
 [ext_resource type="PackedScene" uid="uid://ygi0h704mijm" path="res://UI/Healthbar/healthbar-building.tscn" id="4_msvs2"]
+[ext_resource type="FontFile" uid="uid://drkkic2osaftg" path="res://Assets/fonts/Minecraftia-Regular.ttf" id="5_ddcd8"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jcmoc"]
 atlas = ExtResource("1_jcmoc")
@@ -146,6 +147,43 @@ animations = [{
 "speed": 10.0
 }]
 
+[sub_resource type="Animation" id="Animation_53jov"]
+resource_name = "new_animation"
+loop_mode = 2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-39.8222, -67.2914), Vector2(-39.8221, -84.8457)]
+}
+
+[sub_resource type="Animation" id="Animation_7rem7"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-39.8222, -67.2914)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_7xf2m"]
+_data = {
+&"RESET": SubResource("Animation_7rem7"),
+&"new_animation": SubResource("Animation_53jov")
+}
+
 [node name="WaterPump" type="AnimatedSprite2D" groups=["buildings"]]
 position = Vector2(16, 10)
 scale = Vector2(0.328125, 0.328125)
@@ -160,3 +198,19 @@ offset_left = -33.5238
 offset_top = 60.9524
 offset_right = 33.4762
 offset_bottom = 78.9524
+
+[node name="Inactive" type="Label" parent="."]
+visible = false
+offset_left = -39.8221
+offset_top = -75.976
+offset_right = 40.1779
+offset_bottom = -47.976
+theme_override_fonts/font = ExtResource("5_ddcd8")
+theme_override_font_sizes/font_size = 16
+text = "Inactive"
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Inactive"]
+libraries = {
+&"": SubResource("AnimationLibrary_7xf2m")
+}
+autoplay = "new_animation"

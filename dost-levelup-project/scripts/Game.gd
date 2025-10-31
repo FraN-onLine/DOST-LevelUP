@@ -166,7 +166,7 @@ func _connect_plot_slots() -> void:
 		print("Asads")
 		if btn:
 			var plot_idx = [int(i % 5), int(i / 5)] # assuming 5x5 grid
-			btn.plot_index = plot_idx
+			btn.set_plot_index(plot_idx)
 			btn.current_building = null
 			var callable = Callable(self, "_on_enemy_plot_pressed").bind(plot_idx, btn)
 			btn.pressed.connect(callable)

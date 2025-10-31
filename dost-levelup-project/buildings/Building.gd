@@ -18,6 +18,7 @@ var energy_consumption = 0
 var plot_index = [0,0] #this is the index of the current building
 var disabled = false 
 var disable_timer = 0
+var inactive = false
 
 #var level = 0
 @export var damage_popup_scene: PackedScene
@@ -26,8 +27,25 @@ var owner_peer_id: int = 0
 
 signal destroyed(owner_peer_id)
 
-func _init():
+func _ready():
 	hp = max_hp
+
+	# Find the health bar safely
+	if has_node("Healthbar"):
+		health_bar = $Healthbar
+	else:
+		await get_tree().process_frame
+		if has_node("Healthbar"):
+			health_bar = $Healthbar
+
+	# Initialize if it exists
+	if health_bar:
+		if health_bar.has_method("init_health"):
+			health_bar.init_health(max_hp)
+		health_bar.value = hp
+	else:
+		push_warning("⚠️ No Healthbar found in " + str(name))
+
 
 func blackout():
 	await get_tree().create_timer(1).timeout
@@ -54,10 +72,8 @@ func blackout():
 
 
 func _process(delta):
-	if health_bar and hp_not_init:
-		health_bar.init_health(max_hp)
-		print("initialized health")
-		hp_not_init = false
+	if inactive:
+		return
 		
 	if disabled:
 		disable_timer -= delta
@@ -67,14 +83,16 @@ func _process(delta):
 		return
 
 		
-	trigger_effect()
+	trigger_effect(delta)
 
 
-func trigger_effect():
+func trigger_effect(delta):
 	pass
 
 func take_damage(amount: int, damage_type: String) -> void:
-	
+	if inactive:
+		return
+	print("Taking damage:", amount, "type:", damage_type, "HP before:", hp)
 	if damage_type == "fire":
 		hp = max(0, hp - (amount * fire_resistance))
 	elif damage_type == "water":
@@ -87,6 +105,8 @@ func take_damage(amount: int, damage_type: String) -> void:
 		hp = max(0, hp - amount)
 	health_bar.value = hp
 	if hp <= 0:
+		inactive = true
+		$Inactive.visible = true
 		emit_signal("destroyed", owner_peer_id)
 
 	var popup := damage_popup_scene.instantiate()
@@ -100,19 +120,14 @@ func take_damage(amount: int, damage_type: String) -> void:
 		await get_tree().create_timer(0.08).timeout
 		modulate = Color(1, 1, 1)
 
-func repair(amount: int) -> void:
+func repair_building(amount: int) -> void:
+	if inactive:
+		return
+	var popup := damage_popup_scene.instantiate()
+	get_tree().current_scene.add_child(popup)
+	pop_up.get_node("Label").add_color_override("font_color", Color(0, 1, 0))
+	var jitter_x := randf_range(-6, 6)
+	popup.show_damage(amount, global_position + Vector2(jitter_x, -20))
+
 	hp = min(max_hp, hp + amount)
-
-func is_alive() -> bool:
-	return hp > 0
-
-func on_tick(delta: float) -> void:
-	# Override in subclasses for periodic effects
-	pass
-	
-func destroy():
-	pass
-
-func interact(actor_id: int) -> void:
-	# Override to perform actions when player interacts with the building
-	pass
+	health_bar.value = hp
