@@ -285,6 +285,11 @@ animations = [{
 "loop": true,
 "name": &"default",
 "speed": 14.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"off",
+"speed": 5.0
 }]
 
 [sub_resource type="Animation" id="Animation_7rem7"]
@@ -329,22 +334,15 @@ position = Vector2(16, 10)
 scale = Vector2(0.328125, 0.328125)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 autoplay = "default"
-frame_progress = 0.368397
 script = ExtResource("2_w3seh")
 damage_popup_scene = ExtResource("3_fgu50")
 
-[node name="Healthbar" parent="." instance=ExtResource("4_a811v")]
-offset_left = -30.0
-offset_top = 61.0
-offset_right = 37.0
-offset_bottom = 79.0
-
 [node name="Inactive" type="Label" parent="."]
 visible = false
-offset_left = -39.8221
-offset_top = -80.5114
-offset_right = 40.1779
-offset_bottom = -52.5114
+offset_left = -39.8222
+offset_top = -67.2914
+offset_right = 40.1778
+offset_bottom = -39.2914
 theme_override_fonts/font = ExtResource("5_pabux")
 theme_override_font_sizes/font_size = 16
 text = "Inactive"
@@ -354,3 +352,9 @@ libraries = {
 &"": SubResource("AnimationLibrary_7xf2m")
 }
 autoplay = "new_animation"
+
+[node name="Healthbar" parent="." instance=ExtResource("4_a811v")]
+offset_left = -24.381
+offset_top = 48.7619
+offset_right = 31.619
+offset_bottom = 108.762

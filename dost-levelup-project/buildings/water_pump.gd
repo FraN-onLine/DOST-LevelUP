@@ -2,11 +2,10 @@ extends Building
 
 class_name WaterPump
 
-const WATER_PRODUCTION_RATE := 5.0  # Water units per second
-var stored_water := 0.0
-const MAX_WATER_STORAGE := 100.0
+var cooldown_timer = 0.0
+var effect_interval = 20.0
 
-func _ready():
+func init_stats():
 	max_hp = 120
 	hp = max_hp
 	fire_resistance = 1.0    # Takes full fire damage
@@ -14,23 +13,29 @@ func _ready():
 	water_resistance = 0.3   # Takes 30% water damage (70% resistant)
 	sturdiness = 1.0        # Takes full earthquake damage
 	attack = 0
-	production_rate = WATER_PRODUCTION_RATE
-	energy_consumption = 10
+	
 
-func _process(delta):
-	if stored_water < MAX_WATER_STORAGE:
-		stored_water = min(stored_water + (WATER_PRODUCTION_RATE * delta), MAX_WATER_STORAGE)
+func trigger_effect(delta):
+	#for each adjacent plot every 20 seconds, increase their fire resistance by 0.02 (up to a max of 0.3)
+	cooldown_timer += delta
+	if cooldown_timer >= effect_interval:
+		cooldown_timer = 0.0
+		var adjacent = get_parent().adjacent_plot_indices 
+		var parent_node = get_parent().get_parent().get_parent()
+		for adj_index in adjacent:
+			var tile = parent_node.get_tile_at(adj_index)
+			if tile and tile.is_occupied and tile.building_scene:
+				tile.building_scene.water_resistance = min(tile.building_scene.water_resistance + 0.02, 0.3)
+				show_increase()
 
-# Called by other buildings to request water
-func request_water(amount: float) -> float:
-	if stored_water >= amount:
-		stored_water -= amount
-		return amount
-	else:
-		var available = stored_water
-		stored_water = 0
-		return available
+func show_increase() -> void:
+	print("repairing")
+	if inactive:
+		return
+	
+	popup = damage_popup_scene.instantiate()
+	get_tree().current_scene.add_child(popup)
+	popup.get_node("Label").add_theme_color_override("font_color", Color(173, 216, 230))
+	var jitter_x := randf_range(-6, 6)
+	popup.show_text("Adj W. Res++", global_position + Vector2(jitter_x, -20))
 
-# Returns current water level (for UI display)
-func get_water_level() -> float:
-	return stored_water

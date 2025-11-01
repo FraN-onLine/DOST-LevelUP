@@ -6,7 +6,7 @@ var _buffed_positions := []
 # Reducing wind damage by 0.5 (50% less damage)
 const WIND_BUFF := -0.5
 
-func _ready():
+func init_stats():
 	max_hp = 150
 	hp = max_hp
 	fire_resistance = 1.0    # Takes full fire damage
@@ -22,7 +22,7 @@ func _ready():
 func _process(delta):
 	pass
 
-func trigger_effect():
+func trigger_effect(delta):
 	if not get_parent() or not get_parent().has_method("get_tile_at"):
 		return
 	for x in range(plot_index[0] - 1, plot_index[0] + 2):

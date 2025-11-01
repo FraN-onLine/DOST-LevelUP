@@ -536,6 +536,7 @@ func rpc_place_building(owner_peer_id: int, plot_index, card_id: int) -> void:
 			btn.current_building = card_id
 			btn.is_occupied = true
 			btn.building_scene = building_instance
+			btn.building_scene.plot_index = plot_idx
 			print("[Game] Placed building for owner %d at %s (btn idx %d)" % [owner_peer_id, str(plot_index), i])
 			break
 

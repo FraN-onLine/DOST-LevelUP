@@ -13,19 +13,3 @@ offset_bottom = 28.76
 scale = Vector2(0.1, 0.1)
 texture_normal = ExtResource("1_7c8nn")
 script = ExtResource("1_4dmsh")
-
-[node name="popup" type="Control" parent="."]
-anchors_preset = 0
-offset_right = 32.0
-offset_bottom = 32.0
-
-[node name="UI" type="CanvasLayer" parent="popup"]
-
-[node name="PopupPanel" type="PopupPanel" parent="popup/UI"]
-visible = true
-
-[node name="VBoxContainer" type="VBoxContainer" parent="popup/UI/PopupPanel"]
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 96.0
-offset_bottom = 96.0

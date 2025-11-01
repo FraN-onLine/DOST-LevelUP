@@ -38,7 +38,7 @@ func set_available_card_ids_from_scanned_pool() -> void:
 	for k in keys:
 		int_keys.append(int(k))
 	available_card_ids = int_keys
-	print("[Network] available_card_ids populated from scanned card pool: %s" % available_card_ids)
+	print("avail cards: " % available_card_ids)
 
 func get_available_card_ids() -> Array:
 	return available_card_ids.duplicate()

@@ -4,7 +4,7 @@ var heal_timer = 0
 var heal_cooldown = 5
 
 
-func _ready():
+func init_stats():
 	max_hp = 80
 	hp = max_hp
 	fire_resistance = 1.0    # Takes full fire damage
@@ -20,24 +20,15 @@ func trigger_effect(delta: float) -> void:
 	heal_timer += delta
 	if heal_timer > heal_cooldown:
 		heal_timer = 0
-		#heal 4 adjacent buildings by 10, or something 
-		var tile = get_parent().get_parent().get_parent().get_tile_at([plot_index[0],plot_index[1] + 1])
-		if tile:
-			if tile.building_scene:
-				print("heal")
-				tile.building_scene.repair_building(10)
-		tile = get_parent().get_parent().get_parent().get_tile_at([plot_index[0],plot_index[1] - 1])
-		if tile:
-			if tile.building_scene:
-				print("heal")
-				tile.building_scene.repair_building(10)
-		tile = get_parent().get_parent().get_parent().get_tile_at([plot_index[0] + 1,plot_index[1]])
-		if tile:
-			if tile.building_scene:
-				print("heal")
-				tile.building_scene.repair_building(10)
-		tile = get_parent().get_parent().get_parent().get_tile_at([plot_index[0] - 1,plot_index[1]])
-		if tile:
-			if tile.building_scene:
-				print("heal")
+		var plot = get_parent().get_parent().get_parent()
+
+		var directions = [
+			[0, 1], [0, -1], [1, 0], [-1, 0]
+		]
+
+		for dir in directions:
+			var target_index = [plot_index[0] + dir[0], plot_index[1] + dir[1]]
+			print(target_index)
+			var tile = plot.get_tile_at(target_index)
+			if tile and tile.is_occupied and tile.building_scene:
 				tile.building_scene.repair_building(10)

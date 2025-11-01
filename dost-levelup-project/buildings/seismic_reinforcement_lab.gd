@@ -23,7 +23,7 @@ func _ready():
 func _process(delta):
 	pass
 
-func trigger_effect():
+func trigger_effect(delta):
 	if not get_parent() or not get_parent().has_method("get_tile_at"):
 		return
 	for x in range(plot_index[0] - 1, plot_index[0] + 2):

@@ -1,4 +1,4 @@
-extends Node2D
+extends AnimatedSprite2D
 
 class_name Building
 
@@ -29,6 +29,7 @@ var owner_peer_id: int = 0
 signal destroyed(owner_peer_id)
 
 func _ready():
+	init_stats()
 	hp = max_hp
 
 	# Find the health bar safely
@@ -46,6 +47,10 @@ func _ready():
 		health_bar.value = hp
 	else:
 		push_warning("⚠️ No Healthbar found in " + str(name))
+	
+	
+func init_stats():
+	pass
 
 
 func blackout():
@@ -82,7 +87,6 @@ func _process(delta):
 			disabled = false
 			modulate = Color(1,1,1,1)
 		return
-
 		
 	trigger_effect(delta)
 
@@ -95,19 +99,21 @@ func take_damage(amount: int, damage_type: String) -> void:
 		return
 	print("Taking damage:", amount, "type:", damage_type, "HP before:", hp)
 	if damage_type == "fire":
-		hp = max(0, hp - (amount * fire_resistance))
+		amount = amount * fire_resistance
 	elif damage_type == "water":
-		hp = max(0, hp - (amount * water_resistance))
+		amount = amount * water_resistance
 	elif damage_type == "wind":
-		hp = max(0, hp - (amount * wind_resistance))
+		amount = amount * wind_resistance
 	elif damage_type == "quakes":
-		hp = max(0, hp - (amount * sturdiness))
-	else: 
-		hp = max(0, hp - amount)
+		amount = amount * sturdiness
+
+	hp = max(0, hp - amount)
 	health_bar.value = hp
 	if hp <= 0:
 		inactive = true
 		$Inactive.visible = true
+		if sprite_frames.has_animation("off"):
+			play("off")
 		emit_signal("destroyed", owner_peer_id)
 
 	popup = damage_popup_scene.instantiate()
@@ -122,14 +128,18 @@ func take_damage(amount: int, damage_type: String) -> void:
 		modulate = Color(1, 1, 1)
 
 func repair_building(amount: int) -> void:
+	print("repairing")
 	if inactive:
 		return
-		
+	if max_hp < (hp + amount):
+		amount = max_hp - hp
+		if amount == 0:
+			return
 	popup = damage_popup_scene.instantiate()
 	get_tree().current_scene.add_child(popup)
-	popup.get_node("Label").font_color = Color(0, 1, 0)
+	popup.get_node("Label").add_theme_color_override("font_color", Color(144, 238, 144))
 	var jitter_x := randf_range(-6, 6)
-	popup.show_damage(amount, global_position + Vector2(jitter_x, -20))
+	popup.show_num(amount, global_position + Vector2(jitter_x, -20))
 
 	hp = min(max_hp, hp + amount)
 	health_bar.value = hp
