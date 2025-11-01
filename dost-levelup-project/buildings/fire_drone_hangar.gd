@@ -18,12 +18,12 @@ func _ready():
 	production_rate = 0
 	energy_consumption = 10
 
-	_apply_fire_buff_to_self_and_adjacent()
+	#trigger_effect()
 
 func _process(delta):
 	pass
 
-func _apply_fire_buff_to_self_and_adjacent():
+func trigger_effect():
 	if not get_parent() or not get_parent().has_method("get_tile_at"):
 		return
 	for x in range(plot_index[0] - 1, plot_index[0] + 2):
@@ -45,28 +45,28 @@ func _apply_fire_buff_to_self_and_adjacent():
 			tile.set("fire_resistance", new_vuln)
 			_buffed_positions.append(pos)
 
-func _exit_tree():
-	_revert_fire_buff()
+#func _exit_tree():
+#	_revert_fire_buff()
 
-func _revert_fire_buff():
-	if not get_parent() or not get_parent().has_method("get_tile_at"):
-		return
-	for pos in _buffed_positions:
-		var tile = get_parent().get_tile_at(pos)
-		if not tile:
-			continue
-		var current = tile.get("fire_resistance")
-		if current == null:
-			continue
+#func _revert_fire_buff():
+#	if not get_parent() or not get_parent().has_method("get_tile_at"):
+#		return
+#	for pos in _buffed_positions:
+#		var tile = get_parent().get_tile_at(pos)
+#		if not tile:
+#			continue
+#		var current = tile.get("fire_resistance")
+#		if current == null:
+#			continue
 		# Revert: increase vulnerability back (clamped 0..1)
-		var reverted = clamp(current + FIRE_BUFF, 0.0, 1.0)
-		tile.set("fire_resistance", reverted)
-	_buffed_positions.clear()
+#		var reverted = clamp(current + FIRE_BUFF, 0.0, 1.0)
+#		tile.set("fire_resistance", reverted)
+#	_buffed_positions.clear()
 
-func take_damage(amount):
-	hp -= amount
-	if hp <= 0:
-		_revert_fire_buff()
-		queue_free()
-	else:
-		pass
+#func take_damage(amount):
+#	hp -= amount
+#	if hp <= 0:
+#		_revert_fire_buff()
+#		queue_free()
+#	else:
+#		pass

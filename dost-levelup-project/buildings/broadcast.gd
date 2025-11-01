@@ -17,12 +17,12 @@ func _ready():
 	production_rate = 0
 	energy_consumption = 10
 
-	_apply_wind_buff_to_self_and_adjacent()
+	#trigger_effect()
 
 func _process(delta):
 	pass
 
-func _apply_wind_buff_to_self_and_adjacent():
+func trigger_effect():
 	if not get_parent() or not get_parent().has_method("get_tile_at"):
 		return
 	for x in range(plot_index[0] - 1, plot_index[0] + 2):
@@ -40,20 +40,20 @@ func _apply_wind_buff_to_self_and_adjacent():
 			tile.set("wind_resistance", tile.get("wind_resistance") + WIND_BUFF)
 			_buffed_positions.append(pos)
 
-func _exit_tree():
-	_revert_wind_buff()
+#func _exit_tree():
+#	_revert_wind_buff()
 
-func _revert_wind_buff():
-	if not get_parent() or not get_parent().has_method("get_tile_at"):
-		return
-	for pos in _buffed_positions:
-		var tile = get_parent().get_tile_at(pos)
-		if not tile:
-			continue
-		var current = tile.get("wind_resistance")
-		if current != null:
-			tile.set("wind_resistance", current - WIND_BUFF)
-	_buffed_positions.clear()
+#func _revert_wind_buff():
+#	if not get_parent() or not get_parent().has_method("get_tile_at"):
+#		return
+#	for pos in _buffed_positions:
+#		var tile = get_parent().get_tile_at(pos)
+#		if not tile:
+#			continue
+#		var current = tile.get("wind_resistance")
+#		if current != null:
+#			tile.set("wind_resistance", current - WIND_BUFF)
+#	_buffed_positions.clear()
 
 #func take_damage(amount):
 #	hp -= amount
