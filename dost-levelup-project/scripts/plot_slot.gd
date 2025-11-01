@@ -5,6 +5,7 @@ var current_building = null
 var is_occupied = false
 var building_scene = null
 var adjacent_plot_indices = [] #all adjacent plots, max of 8
+var board_owner = ""
 
 func check_occupied():
 	return is_occupied
@@ -56,7 +57,7 @@ func trigger_disaster(card_id: int, disaster_instance):
 				building_scene.take_damage(30, "fire")
 
 			12: # tornado
-				var parent_node = get_parent().get_parent()
+
 				await get_tree().create_timer(0.8).timeout
 
 				if building_scene:
@@ -68,7 +69,15 @@ func trigger_disaster(card_id: int, disaster_instance):
 				var roll: int
 				if multiplayer.is_server():
 					roll = randi_range(1, 100)
-					rpc("sync_tornado_roll", roll)
+					if board_owner == "player":
+						# The tornado occured towards host, so other player shows it at opponent board
+						var opponent_tile = get_tree().root.get_node("Game/OpponentPlot").get_tile_at(plot_index)
+						opponent_tile.rpc("sync_tornado_roll", roll)
+					else:
+						# The tornado occured towards client, so host shows it at player board
+						var player_tile = get_tree().root.get_node("Game/PlayerPlot").get_tile_at(plot_index)
+						player_tile.rpc("sync_tornado_roll", roll)
+					# Host also processes the roll	
 					sync_tornado_roll(roll)
 				else:
 					return # clients will wait for host to send roll

@@ -157,6 +157,7 @@ func _connect_plot_slots() -> void:
 			var plot_idx = [int(i % 5), int(i / 5)] # assuming 5x5 grid
 			btn.set_plot_index(plot_idx)
 			btn.current_building = null
+			btn.board_owner = "player"
 			var callable = Callable(self, "_on_plot_pressed").bind(plot_idx, btn)
 			btn.pressed.connect(callable)
 	
@@ -170,6 +171,7 @@ func _connect_plot_slots() -> void:
 			var plot_idx = [int(i % 5), int(i / 5)] # assuming 5x5 grid
 			btn.set_plot_index(plot_idx)
 			btn.current_building = null
+			btn.board_owner = "opponent"
 			var callable = Callable(self, "_on_enemy_plot_pressed").bind(plot_idx, btn)
 			btn.pressed.connect(callable)
 
