@@ -1,11 +1,48 @@
 extends TextureButton
 
+@onready var hover = $PanelContainer
+
 var plot_index = [0, 0]
 var current_building = null
 var is_occupied = false
 var building_scene = null
 var adjacent_plot_indices = [] # all adjacent plots, max of 8
 var board_owner = ""
+
+func _ready() -> void:
+	# Ensure hover panel exists
+	hover = get_node_or_null("PanelContainer")
+	if not hover:
+		push_error("Plot slot is missing PanelContainer for hover!")
+		return
+		
+	# Connect mouse signals
+	mouse_entered.connect(on_mouse_entered)
+	mouse_exited.connect(on_mouse_exited)
+
+func on_mouse_entered() -> void:
+	if hover and building_scene and is_occupied:
+		# Only show hover if there's a building
+		# First update the label's text
+		if hover.has_node("VBoxContainer/Label"):
+			hover.get_node("VBoxContainer/Label").text = building_scene.name
+		if hover.has_node("VBoxContainer/HPLabel"):
+			hover.get_node("VBoxContainer/HPLabel").text = "HP: %d/%d" % [building_scene.hp, building_scene.max_hp]
+		if hover.has_node("VBoxContainer/EnergyLabel"):
+			hover.get_node("VBoxContainer/EnergyLabel").text = "Energy: %d" % building_scene.energy_consumption
+		
+		# Store building data if needed
+		var building_data = {
+			"name": building_scene.name,
+			"hp": building_scene.hp,
+			"max_hp": building_scene.max_hp,
+			"energy": building_scene.energy_consumption
+		}
+		hover.toggle(true)
+
+func on_mouse_exited() -> void:
+	if hover:
+		hover.toggle(false)
 
 func check_occupied():
 	return is_occupied

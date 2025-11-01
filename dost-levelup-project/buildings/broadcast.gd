@@ -22,9 +22,9 @@ func _ready():
 func _process(delta):
 	pass
 
-func trigger_effect():
+func trigger_effect(delta: Variant) -> Variant:
 	if not get_parent() or not get_parent().has_method("get_tile_at"):
-		return
+		return null
 	for x in range(plot_index[0] - 1, plot_index[0] + 2):
 		for y in range(plot_index[1] - 1, plot_index[1] + 2):
 			var pos = Vector2(x, y)
@@ -39,6 +39,7 @@ func trigger_effect():
 			# Subtract WIND_BUFF to reduce damage taken
 			tile.set("wind_resistance", tile.get("wind_resistance") + WIND_BUFF)
 			_buffed_positions.append(pos)
+	return null
 
 #func _exit_tree():
 #	_revert_wind_buff()
