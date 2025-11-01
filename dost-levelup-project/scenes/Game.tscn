@@ -128,7 +128,6 @@ offset_bottom = -10.0
 [node name="Players" type="Node" parent="."]
 
 [node name="PlayerPlot" parent="." instance=ExtResource("3_cpr0p")]
-visible = false
 offset_left = 24.0
 offset_top = 19.0
 offset_right = 24.0
