@@ -25,10 +25,10 @@ func set_plot_index(index: Array) -> void:
 			adjacent_plot_indices.append(adjacent_index)
 
 func trigger_disaster(card_id: int, disaster_instance):
-	if is_occupied and building_scene:
 		match card_id:
 			9: #blackout
-				building_scene.blackout()
+				if is_occupied and building_scene:
+					building_scene.blackout()
 			10: #area 3x3 quakey
 				await get_tree().create_timer(0.8).timeout
 				var parent_node = get_parent().get_parent()
@@ -36,7 +36,8 @@ func trigger_disaster(card_id: int, disaster_instance):
 					var tile = parent_node.get_tile_at(adj_index)
 					if tile and tile.is_occupied and tile.building_scene:
 						tile.building_scene.take_damage(30, "quakes")
-				building_scene.take_damage(30, "quakes")
+				if is_occupied and building_scene:
+					building_scene.take_damage(30, "quakes")
 			11: #area 3x3 meterorrer
 				await get_tree().create_timer(0.8).timeout
 				var parent_node = get_parent().get_parent()
@@ -44,10 +45,11 @@ func trigger_disaster(card_id: int, disaster_instance):
 					var tile = parent_node.get_tile_at(adj_index)
 					if tile and tile.is_occupied and tile.building_scene:
 						tile.building_scene.take_damage(30, "fire")
-				building_scene.take_damage(30, "fire")
+				if is_occupied and building_scene:
+					building_scene.take_damage(30, "fire")
 			12: #townaddooooooo
 				await get_tree().create_timer(0.8).timeout
-				if building_scene:
+				if is_occupied and building_scene:
 					building_scene.take_damage(5, "wind")
 
 				await get_tree().create_timer(0.8).timeout
