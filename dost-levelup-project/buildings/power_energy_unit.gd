@@ -16,7 +16,7 @@ func _ready():
     # optional: register in group as well
     add_to_group("buildings")
 
-func _process(delta):
+func trigger_effect(delta):
     # add production_rate per second to the global/network energy rate
     var net = get_node_or_null("/root/Network")
     if net and net.has_method("add_energy"):
@@ -25,9 +25,9 @@ func _process(delta):
     elif net and net.has_variable("energy_rate"):
         net.energy_rate += production_rate * delta
 
-func take_damage(amount):
-    hp -= amount
-    if hp <= 0:
-        queue_free()
-    else:
-        pass
+#func take_damage(amount):
+#    hp -= amount
+#    if hp <= 0:
+#        queue_free()
+#   else:
+#        pass

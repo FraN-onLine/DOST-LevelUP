@@ -3,6 +3,7 @@ extends Building
 var heal_timer = 0
 var heal_cooldown = 5
 
+
 func _ready():
 	max_hp = 80
 	hp = max_hp

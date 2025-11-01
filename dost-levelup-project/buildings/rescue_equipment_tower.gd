@@ -8,10 +8,10 @@ const REPAIR_RADIUS := 2  # blocks away
 func _ready():
     max_hp = 100
     hp = max_hp
-    fire_resistance = 0
-    wind_resistance = 0
-    water_resistance = 0
-    sturdiness = 0
+    fire_resistance = 1
+    wind_resistance = 1
+    water_resistance = 1
+    sturdiness = 1
     attack = 0
     production_rate = 0
     energy_consumption = 15
@@ -19,7 +19,7 @@ func _ready():
 func _process(delta):
     _repair_nearby_buildings(delta)
 
-func _repair_nearby_buildings(delta):
+func trigger_effect(delta):
     if not get_parent() or not get_parent().has_method("get_tile_at"):
         return
         
@@ -45,7 +45,7 @@ func _repair_nearby_buildings(delta):
             var heal_amount = REPAIR_RATE * delta
             building.hp = min(building.hp + heal_amount, building.max_hp)
 
-func take_damage(amount):
-    hp -= amount
-    if hp <= 0:
-        queue_free()
+#func take_damage(amount):
+#    hp -= amount
+#    if hp <= 0:
+#        queue_free()

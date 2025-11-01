@@ -73,7 +73,7 @@ func _find_nearest_water_pump():
 func get_water_level() -> float:
 	return stored_water
 
-func take_damage(amount):
-	hp -= amount
-	if hp <= 0:
-		queue_free()
+#func take_damage(amount):
+#	hp -= amount
+#	if hp <= 0:
+#		queue_free()
