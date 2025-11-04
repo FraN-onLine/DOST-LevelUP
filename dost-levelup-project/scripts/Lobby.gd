@@ -6,6 +6,7 @@ extends Control
 @onready var start_game_button = $VBoxContainer/ButtonContainer/StartGameButton
 @onready var leave_button = $VBoxContainer/ButtonContainer/LeaveButton
 @onready var status_label = $StatusLabel
+@onready var ip_label = $IPLabel
 
 var connected_players = {}
 var is_host = false
@@ -27,9 +28,14 @@ func _ready():
 	
 	if is_host:
 		status_label.text = "You are the host. Waiting for players..."
+		# Display IP address for host
+		_display_host_ip()
 	else:
 		status_label.text = "Connected to host. Waiting for game to start..."
 		start_game_button.visible = false
+		# Hide IP label for clients
+		if ip_label:
+			ip_label.visible = false
 	
 	# Request current player list from server
 	if is_host:
@@ -97,6 +103,79 @@ func _change_name():
 func _on_player_list_updated(players: Dictionary):
 	connected_players = players.duplicate()
 	_update_player_list()
+
+func _display_host_ip():
+	if not ip_label:
+		return
+	
+	var ip_addresses = IP.get_local_addresses()
+	var host_ip = "Not Found"
+	
+	print("========================================")
+	print("HOST IP DETECTION")
+	print("All IP addresses detected: ", ip_addresses)
+	
+	var valid_ips = []
+	
+	# Collect all valid private network IPs
+	for ip in ip_addresses:
+		if typeof(ip) != TYPE_STRING:
+			continue
+		
+		print("Checking: ", ip)
+		
+		# Skip localhost
+		if ip == "127.0.0.1" or ip == "::1":
+			print("  -> Skipped (localhost)")
+			continue
+		
+		# Skip link-local
+		if ip.begins_with("169.254") or ip.begins_with("fe80"):
+			print("  -> Skipped (link-local)")
+			continue
+		
+		# Skip IPv6 (contains colon)
+		if ":" in ip:
+			print("  -> Skipped (IPv6)")
+			continue
+		
+		# Collect private network IPs
+		if ip.begins_with("192.168.") or ip.begins_with("10."):
+			valid_ips.append(ip)
+			print("  -> Added to valid IPs")
+		elif ip.begins_with("172."):
+			var parts = ip.split(".")
+			if parts.size() >= 2:
+				var second_octet = int(parts[1])
+				if second_octet >= 16 and second_octet <= 31:
+					valid_ips.append(ip)
+					print("  -> Added to valid IPs")
+	
+	print("Valid IPs found: ", valid_ips)
+	
+	# If we have multiple IPs, prefer the one that's NOT a virtual adapter
+	if valid_ips.size() > 1:
+		for ip in valid_ips:
+			# Skip common virtual adapter IPs
+			if ip.ends_with(".137.1"):  # Windows Mobile Hotspot
+				print("  ", ip, " -> Skipped (likely virtual adapter)")
+				continue
+			if ip.ends_with(".1.1"):  # Common virtual adapter
+				print("  ", ip, " -> Skipped (likely virtual adapter)")
+				continue
+			# Prefer this IP
+			host_ip = ip
+			print("  ", ip, " -> SELECTED! (likely physical adapter)")
+			break
+	elif valid_ips.size() == 1:
+		host_ip = valid_ips[0]
+		print("  ", host_ip, " -> Only valid IP found")
+	
+	ip_label.text = "Share this IP: " + host_ip + " | Port: " + str(Network.DEFAULT_PORT)
+	ip_label.visible = true
+	
+	print("Final IP shown to host: ", host_ip)
+	print("========================================")
 
 func _update_player_list():
 	# Clear existing player labels
