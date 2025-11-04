@@ -416,7 +416,7 @@ animation = &"off"
 autoplay = "new_animation"
 frame = 24
 frame_progress = 1.0
-offset = Vector2(2.525, -47.865)
+offset = Vector2(2.525, -41.865)
 script = ExtResource("2_pd5kn")
 damage_popup_scene = ExtResource("3_by5wo")
 
