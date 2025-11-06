@@ -1,8 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://cfdlnl2idxx8u"]
+[gd_scene load_steps=3 format=3 uid="uid://cfdlnl2idxx8u"]
 
 [ext_resource type="PackedScene" uid="uid://dbyrtjs0ruycc" path="res://scenes/plot_slot.tscn" id="1"]
 [ext_resource type="Script" uid="uid://dnt4wi4s4ryt2" path="res://scripts/player_plot.gd" id="1_jcilw"]
-[ext_resource type="Texture2D" uid="uid://bons6a4343imk" path="res://Assets/landscape/sadas.png" id="3_gqv62"]
 
 [node name="PlayerPlot" type="Control"]
 texture_filter = 1
@@ -25,7 +24,6 @@ anchor_bottom = 0.0
 offset_right = 144.0
 offset_bottom = 74.765
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_0" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -36,7 +34,6 @@ offset_left = 144.0
 offset_right = 288.0
 offset_bottom = 74.765
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_1" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -47,7 +44,6 @@ offset_left = 288.0
 offset_right = 432.0
 offset_bottom = 74.765
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_3" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -58,7 +54,6 @@ offset_left = 432.0
 offset_right = 576.0
 offset_bottom = 74.765
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_4" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -69,7 +64,6 @@ offset_left = 576.0
 offset_right = 720.0
 offset_bottom = 74.765
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_5" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -80,7 +74,6 @@ offset_top = 73.3333
 offset_right = 144.0
 offset_bottom = 147.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_6" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -92,7 +85,6 @@ offset_top = 73.3333
 offset_right = 288.0
 offset_bottom = 147.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_7" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -104,7 +96,6 @@ offset_top = 73.3333
 offset_right = 432.0
 offset_bottom = 147.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_8" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -116,7 +107,6 @@ offset_top = 73.3333
 offset_right = 576.0
 offset_bottom = 147.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_9" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -128,7 +118,6 @@ offset_top = 73.3333
 offset_right = 720.0
 offset_bottom = 147.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_10" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -139,7 +128,6 @@ offset_top = 146.667
 offset_right = 144.0
 offset_bottom = 220.667
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_11" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -151,7 +139,6 @@ offset_top = 146.667
 offset_right = 288.0
 offset_bottom = 220.667
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_12" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -163,7 +150,6 @@ offset_top = 146.667
 offset_right = 432.0
 offset_bottom = 220.667
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_13" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -175,7 +161,6 @@ offset_top = 146.667
 offset_right = 576.0
 offset_bottom = 220.667
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_14" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -187,7 +172,6 @@ offset_top = 146.667
 offset_right = 720.0
 offset_bottom = 220.667
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_15" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -198,7 +182,6 @@ offset_top = 220.0
 offset_right = 144.0
 offset_bottom = 294.0
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_16" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -210,7 +193,6 @@ offset_top = 220.0
 offset_right = 288.0
 offset_bottom = 294.0
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_17" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -222,7 +204,6 @@ offset_top = 220.0
 offset_right = 432.0
 offset_bottom = 294.0
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_18" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -234,7 +215,6 @@ offset_top = 220.0
 offset_right = 576.0
 offset_bottom = 294.0
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_19" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -246,7 +226,6 @@ offset_top = 220.0
 offset_right = 720.0
 offset_bottom = 294.0
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_20" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -257,7 +236,6 @@ offset_top = 293.333
 offset_right = 144.0
 offset_bottom = 367.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_21" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -269,7 +247,6 @@ offset_top = 293.333
 offset_right = 288.0
 offset_bottom = 367.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_23" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -281,7 +258,6 @@ offset_top = 293.333
 offset_right = 432.0
 offset_bottom = 367.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_22" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -293,7 +269,6 @@ offset_top = 293.333
 offset_right = 576.0
 offset_bottom = 367.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
 
 [node name="PlayerPlot_GridContainer#Plot_24" parent="GridContainer" instance=ExtResource("1")]
 layout_mode = 2
@@ -305,4 +280,3 @@ offset_top = 293.333
 offset_right = 720.0
 offset_bottom = 367.333
 scale = Vector2(1, 1)
-texture_normal = ExtResource("3_gqv62")
