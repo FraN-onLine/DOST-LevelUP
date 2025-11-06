@@ -373,10 +373,10 @@ texture = ExtResource("10_2rd6h")
 [node name="Players" type="Node" parent="."]
 
 [node name="PlayerPlot" parent="." instance=ExtResource("3_cpr0p")]
-offset_left = -8.0
-offset_top = 49.0
-offset_right = -8.0
-offset_bottom = 49.0
+offset_left = 147.0
+offset_top = 132.0
+offset_right = 147.0
+offset_bottom = 132.0
 scale = Vector2(6, 6)
 
 [node name="OpponentPlot" parent="." instance=ExtResource("3_cpr0p")]
@@ -387,9 +387,10 @@ offset_bottom = 45.0
 scale = Vector2(6, 6)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-visible = false
+position = Vector2(186, 209)
+scale = Vector2(0.185, 0.185)
 sprite_frames = SubResource("SpriteFrames_754j2")
-frame_progress = 0.459087
+frame_progress = 0.708285
 
 [connection signal="timeout" from="CanvasLayer/Timer" to="." method="_on_timer_timeout"]
 
