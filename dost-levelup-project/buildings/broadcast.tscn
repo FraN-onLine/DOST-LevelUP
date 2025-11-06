@@ -334,7 +334,7 @@ _data = {
 position = Vector2(16, 10)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 autoplay = "default"
-offset = Vector2(-2.825, -45.78)
+offset = Vector2(-2.825, -39.78)
 script = ExtResource("2_w3seh")
 damage_popup_scene = ExtResource("3_fgu50")
 

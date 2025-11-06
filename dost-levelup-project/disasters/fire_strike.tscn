@@ -134,9 +134,7 @@ scale = Vector2(5, 5)
 sprite_frames = SubResource("SpriteFrames_3mswn")
 animation = &"new_animation"
 autoplay = "new_animation"
-frame = 16
-frame_progress = 1.0
-offset = Vector2(7.085, -1.715)
+offset = Vector2(13.155, -22.905)
 script = ExtResource("2_ljend")
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]

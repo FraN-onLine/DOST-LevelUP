@@ -2,7 +2,7 @@ extends PanelContainer
 
 var opacity_tween: Tween = null
 # Offset up and slightly to the right of cursor
-var mouse_offset = Vector2(15, -50)  # x=15 pixels right, y=-50 pixels up
+var mouse_offset = Vector2(-40, -270)  # x=10 pixels right, y=-120 pixels up (panel at top of mouse)
 
 func _ready() -> void:
 	# Make this Control render in screen space, ignoring parent transforms
@@ -28,8 +28,16 @@ func _process(_delta: float) -> void:
 		# Convert to canvas coordinates (accounts for camera zoom/pan)
 		var canvas_transform = get_canvas_transform()
 		var canvas_mouse_pos = canvas_transform.affine_inverse() * viewport_mouse_pos
+		
+		# Get camera zoom to scale the hover panel
+		var camera_zoom = _get_camera_zoom()
+		scale = Vector2.ONE / camera_zoom  # Inverse scale to maintain constant screen size
+		
+		# Apply zoom to mouse offset as well
+		var scaled_offset = mouse_offset / camera_zoom
+		
 		# Set global position (bypasses parent transforms because top_level=true)
-		global_position = canvas_mouse_pos + mouse_offset
+		global_position = canvas_mouse_pos + scaled_offset
 
 func toggle(on: bool) -> void:
 	if opacity_tween and opacity_tween.is_valid():
@@ -58,3 +66,11 @@ func tween_opacity(to: float) -> Tween:
 	opacity_tween = create_tween()
 	opacity_tween.tween_property(self, "modulate:a", to, 0.3)
 	return opacity_tween
+
+func _get_camera_zoom() -> Vector2:
+	# Try to find the camera in the scene
+	var camera = get_viewport().get_camera_2d()
+	if camera:
+		return camera.zoom
+	# Fallback to no zoom if camera not found
+	return Vector2.ONE

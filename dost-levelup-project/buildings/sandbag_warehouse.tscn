@@ -156,7 +156,7 @@ sprite_frames = SubResource("SpriteFrames_3mswn")
 animation = &"new_animation"
 autoplay = "new_animation"
 frame_progress = 0.736063
-offset = Vector2(-0.25, -36.74)
+offset = Vector2(-0.25, -30.74)
 script = ExtResource("2_51hct")
 damage_popup_scene = ExtResource("3_51hct")
 

@@ -2,7 +2,11 @@
 
 importer="wav"
 type="AudioStreamWAV"
+<<<<<<< HEAD
 uid="uid://4wqhflbv1nts"
+=======
+uid="uid://5aa3arw2w6m5"
+>>>>>>> 95f0c5ab265ef07adb6e9ce192a9993a84c6f2eb
 path="res://.godot/imported/fsmash3.wav-e26892b4173ce75c455ec4ba996c7dd3.sample"
 
 [deps]
