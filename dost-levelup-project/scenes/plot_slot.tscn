@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dbyrtjs0ruycc"]
+[gd_scene load_steps=4 format=3 uid="uid://dbyrtjs0ruycc"]
 
 [ext_resource type="Script" uid="uid://bkw3188x2dtok" path="res://scripts/plot_slot.gd" id="1_4dmsh"]
 [ext_resource type="PackedScene" uid="uid://qdmvb7aoqoir" path="res://scenes/hover.tscn" id="3_7c8nn"]
+[ext_resource type="FontFile" uid="uid://drkkic2osaftg" path="res://Assets/fonts/Minecraftia-Regular.ttf" id="3_tjnd5"]
 
 [node name="PlotSlot" type="TextureButton"]
 custom_minimum_size = Vector2(64, 64)
@@ -24,5 +25,6 @@ offset_bottom = 77.0
 
 [node name="SmartCenterLabel" type="Label" parent="PanelContainer/VBoxContainer" index="3"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("3_tjnd5")
 
 [editable path="PanelContainer"]

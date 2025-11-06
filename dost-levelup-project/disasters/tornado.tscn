@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://dpc1r8q6voml" path="res://Assets/disasters/Tornado_Sweep.png" id="1_1f5h1"]
 [ext_resource type="Script" uid="uid://78gu4ngc241y" path="res://disasters/blackout.gd" id="2_yhlgd"]
-[ext_resource type="AudioStream" uid="uid://drdghv3td31d3" path="res://Sounds/Disasters/typhoonbreaker_YzJHJNql.wav" id="3_yhlgd"]
+[ext_resource type="AudioStream" path="res://Sounds/Disasters/typhoonbreaker_YzJHJNql.wav" id="3_yhlgd"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yhlgd"]
 atlas = ExtResource("1_1f5h1")

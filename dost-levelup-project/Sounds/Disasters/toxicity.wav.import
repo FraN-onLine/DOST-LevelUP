@@ -2,11 +2,7 @@
 
 importer="wav"
 type="AudioStreamWAV"
-<<<<<<< HEAD
-uid="uid://bvh6kptq1sjk6"
-=======
-uid="uid://56lvju84le1j"
->>>>>>> 95f0c5ab265ef07adb6e9ce192a9993a84c6f2eb
+uid="uid://cfm3desmhb0uf"
 path="res://.godot/imported/toxicity.wav-30e616fc995374a510bdd0cc93088172.sample"
 
 [deps]

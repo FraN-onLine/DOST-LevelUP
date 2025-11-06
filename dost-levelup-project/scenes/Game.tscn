@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://q32nagr62ido" path="res://Assets/UI/Energy-Sheet.png" id="6_aug50"]
 [ext_resource type="Texture2D" uid="uid://b6ugwucajnrhk" path="res://Assets/UI/pips-male-Sheet.png" id="7_mcffj"]
 [ext_resource type="PackedScene" uid="uid://ygi0h704mijm" path="res://UI/Healthbar/healthbar-building.tscn" id="8_400sg"]
-[ext_resource type="TileSet" uid="uid://c5xxb6cuhpuor" path="res://Assets/landscape/player_plot.tres" id="9_qy1jj"]
+[ext_resource type="TileSet" uid="uid://bosxpoh84mk4e" path="res://Assets/landscape/player_plot.tres" id="9_qy1jj"]
 [ext_resource type="Texture2D" uid="uid://bbgtcy3i3gqgc" path="res://Assets/landscape/grass-grid.png" id="10_3xj3m"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_kiw3p"]

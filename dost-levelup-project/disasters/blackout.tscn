@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://dmfxfn20uf2cl" path="res://Assets/disasters/BlackoutBurst.png" id="1_vmujt"]
 [ext_resource type="Script" uid="uid://78gu4ngc241y" path="res://disasters/blackout.gd" id="2_wf2fj"]
-[ext_resource type="AudioStream" uid="uid://b0kri8hg57rwc" path="res://Sounds/Disasters/BlackoutBurst.wav" id="3_emvmu"]
+[ext_resource type="AudioStream" path="res://Sounds/Disasters/BlackoutBurst.wav" id="3_emvmu"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_wf2fj"]
 atlas = ExtResource("1_vmujt")

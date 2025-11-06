@@ -2,11 +2,7 @@
 
 importer="wav"
 type="AudioStreamWAV"
-<<<<<<< HEAD
-uid="uid://2h0fb81gnqq3"
-=======
-uid="uid://tt7h7g5hs8wk"
->>>>>>> 95f0c5ab265ef07adb6e9ce192a9993a84c6f2eb
+uid="uid://duhflhvjb5542"
 path="res://.godot/imported/Tunder.wav-667d8366e64172e3fb4b1b5b68955ce0.sample"
 
 [deps]

@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://bp4vvmthl52u6" path="res://Assets/disasters/toxic-surge.png" id="1_s8fcx"]
 [ext_resource type="Script" uid="uid://78gu4ngc241y" path="res://disasters/blackout.gd" id="2_o60pk"]
-[ext_resource type="AudioStream" uid="uid://drdghv3td31d3" path="res://Sounds/Disasters/typhoonbreaker_YzJHJNql.wav" id="3_58txs"]
+[ext_resource type="AudioStream" path="res://Sounds/Disasters/typhoonbreaker_YzJHJNql.wav" id="3_58txs"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o60pk"]
 atlas = ExtResource("1_s8fcx")
