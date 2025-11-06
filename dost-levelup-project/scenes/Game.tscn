@@ -185,14 +185,16 @@ autoplay = "default"
 frame_progress = 0.242046
 
 [node name="Label" type="Label" parent="CanvasLayer"]
-offset_left = 565.0
-offset_top = 626.0
-offset_right = 605.0
-offset_bottom = 649.0
+visible = false
+offset_left = 566.09
+offset_top = 627.5
+offset_right = 613.73
+offset_bottom = 641.5
+scale = Vector2(0.63, 0.63)
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_s0nni")
 theme_override_font_sizes/font_size = 8
-text = "TIME"
+horizontal_alignment = 1
 
 [node name="Timer" type="Timer" parent="CanvasLayer"]
 autostart = true
@@ -232,7 +234,6 @@ offset_left = 354.0
 offset_top = 575.0
 offset_right = 733.952
 offset_bottom = 722.208
-metadata/_edit_lock_ = true
 
 [node name="PlayerSprite" type="AnimatedSprite2D" parent="CanvasLayer"]
 position = Vector2(105, 503)
