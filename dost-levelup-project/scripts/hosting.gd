@@ -57,4 +57,3 @@ func _on_network_connected(success: bool, reason: String):
 		get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
 	else:
 		status_label.text = "Failed to start host: " + reason
-

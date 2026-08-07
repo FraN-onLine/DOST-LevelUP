@@ -1,8 +1,8 @@
 extends Control
 
-@onready var player_list_vbox = $CenterContainer/VBoxContainer/PlayerList/Panel/PlayerListScroll/PlayerListVBox
-@onready var name_input = $CenterContainer/VBoxContainer/NameChangeContainer/NameInput
-@onready var change_name_button = $CenterContainer/VBoxContainer/NameChangeContainer/ChangeNameButton
+@onready var player_list_vbox = $CenterContainer/VBoxContainer/PlayerListScroll/PlayerListVBox
+@onready var name_input = $CenterContainer/VBoxContainer/NameInput
+@onready var change_name_button = $CenterContainer/VBoxContainer/ChangeNameButton
 @onready var start_game_button = $CenterContainer/VBoxContainer/ButtonContainer/StartGameButton
 @onready var leave_button = $CenterContainer/VBoxContainer/ButtonContainer/LeaveButton
 @onready var status_label = $StatusLabel
@@ -107,13 +107,15 @@ func _on_player_list_updated(players: Dictionary):
 	_update_player_list()
 
 func _update_player_list():
-	# Clear existing player labels
+	# Clear existing player labels immediately (not deferred) to prevent overlap
 	for child in player_list_vbox.get_children():
+		player_list_vbox.remove_child(child)
 		child.queue_free()
 	
 	# Add current players
 	for player_id in connected_players.keys():
 		var hbox = HBoxContainer.new()
+		hbox.custom_minimum_size = Vector2(0, 28)
 		var label = Label.new()
 		label.text = str(connected_players[player_id])
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT

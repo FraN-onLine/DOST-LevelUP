@@ -1,11 +1,11 @@
 extends Control
 
-@onready var host_list = $CenterContainer/VBoxContainer/HostListContainer/Panel/VBox/HostList
-@onready var host_list_vbox = $CenterContainer/VBoxContainer/HostListContainer/Panel/VBox/HostList/HostListVBox
+@onready var host_list = $CenterContainer/VBoxContainer/HostListScroll
+@onready var host_list_vbox = $CenterContainer/VBoxContainer/HostListScroll/HostListVBox
 @onready var refresh_button = $CenterContainer/VBoxContainer/RefreshButton
 @onready var back_button = $CenterContainer/VBoxContainer/BackButton
 @onready var status_label = $StatusLabel
-@onready var search_spinner = $CenterContainer/VBoxContainer/HostListContainer/Panel/VBox/SearchLabel
+@onready var search_spinner = $CenterContainer/VBoxContainer/SearchLabel
 
 var host_items := {}  # ip -> Button
 var _search_timer: Timer
@@ -53,8 +53,9 @@ func _on_host_lost(ip: String):
 	_refresh_host_list()
 
 func _refresh_host_list():
-	# Clear existing host entries
+	# Clear existing host entries immediately (not deferred) to prevent overlap
 	for child in host_list_vbox.get_children():
+		host_list_vbox.remove_child(child)
 		child.queue_free()
 	host_items.clear()
 	
@@ -67,12 +68,22 @@ func _refresh_host_list():
 		return
 	
 	search_spinner.visible = false
-	status_label.text = "Found %d host(s) on LAN - tap to join" % discovered.size()
 	
-	# Sort by host name for a clean list
+	# Deduplicate by host name - the same host may be discovered via multiple
+	# broadcast destinations (255.255.255.255 + subnet broadcast) and unicast responses
+	var seen_names := {}
 	var hosts := []
 	for ip in discovered.keys():
-		hosts.append({"ip": ip, "name": str(discovered[ip]["name"])})
+		var name = str(discovered[ip]["name"])
+		var name_key = name.to_lower()
+		if seen_names.has(name_key):
+			continue  # skip duplicate host with same name
+		seen_names[name_key] = true
+		hosts.append({"ip": ip, "name": name})
+	
+	status_label.text = "Found %d host(s) on LAN - tap to join" % hosts.size()
+	
+	# Sort by host name for a clean list
 	hosts.sort_custom(func(a, b): return a["name"].to_lower() < b["name"].to_lower())
 	
 	for host_info in hosts:
