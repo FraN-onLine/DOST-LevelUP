@@ -2,6 +2,7 @@ extends Control
 
 @onready var host_button = $CenterContainer/VBoxContainer/HostButton
 @onready var join_button = $CenterContainer/VBoxContainer/JoinButton
+@onready var almanac_button = $CenterContainer/VBoxContainer/AlmanacButton
 @onready var instructions_button = $CenterContainer/VBoxContainer/InstructionsButton
 @onready var quit_button = $CenterContainer/VBoxContainer/QuitButton
 @onready var status_label = $StatusLabel
@@ -13,6 +14,7 @@ func _ready():
 	# Connect button signals
 	host_button.pressed.connect(_on_host_pressed)
 	join_button.pressed.connect(_on_join_pressed)
+	almanac_button.pressed.connect(_on_almanac_pressed)
 	instructions_button.pressed.connect(_on_instructions_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 	close_instructions_button.pressed.connect(_on_close_instructions_pressed)
@@ -35,6 +37,10 @@ func _on_host_pressed():
 func _on_join_pressed():
 	# Switch to join scene which auto-discovers hosts on LAN
 	get_tree().change_scene_to_file("res://scenes/JoinGame.tscn")
+
+func _on_almanac_pressed():
+	# Open the almanac to view all cards
+	get_tree().change_scene_to_file("res://scenes/Almanac.tscn")
 
 func _on_quit_pressed():
 	get_tree().quit()

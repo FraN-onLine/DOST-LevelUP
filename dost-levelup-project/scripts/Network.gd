@@ -39,6 +39,8 @@ var _energy_timer: Timer = null
 var card_pool := {} # id -> {path: String, name: String, frequency: int}
 @export var available_card_ids: Array = [1,2,3,4,5,6,9, 10, 11, 12, 13] # list of card ids the server can draw from (set in inspector or code)
 @export var card_back: Texture2D = null # optional explicit card back texture used for opponents
+var disaster_only_card_ids := [9, 10, 11, 12, 13] # late-game: when a player's board is full, only deal disasters
+var player_disaster_draw := {} # peer_id -> bool (true = this player only receives disaster cards)
 
 # Programmatic helpers to control the available card pool at runtime
 func set_available_card_ids(ids: Array) -> void:
@@ -59,6 +61,14 @@ func set_available_card_ids_from_scanned_pool() -> void:
 
 func get_available_card_ids() -> Array:
 	return available_card_ids.duplicate()
+
+# Late-game: when a player's board is full, set them to only draw disaster cards
+func set_player_disaster_draw(peer_id: int, enabled: bool) -> void:
+	player_disaster_draw[peer_id] = enabled
+	print("[Network] Player %d disaster-only draw: %s" % [peer_id, enabled])
+
+func is_player_disaster_draw(peer_id: int) -> bool:
+	return player_disaster_draw.get(peer_id, false)
 
 # Utility: call locally if target_peer is self, otherwise rpc_id the remote peer.
 func call_or_rpc_id(target_peer: int, method_name: String, args: Array = []) -> void:
@@ -900,16 +910,20 @@ func request_full_hand_draw(player_id: int) -> void:
 	print("[Network] request_full_hand_draw for player", player_id)
 
 	# Build a shuffled pool copy and draw up to 4 cards
-	var pool := available_card_ids.duplicate()
+	# If this player's board is full (disaster-only mode), only draw disaster cards
+	var draw_pool := available_card_ids.duplicate()
+	if is_player_disaster_draw(player_id):
+		draw_pool = disaster_only_card_ids.duplicate()
+		print("[Network] Player %d board full - disaster-only draw" % player_id)
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	pool.shuffle()
+	draw_pool.shuffle()
 
 	var new_hand := []
 	for i in range(4):
-		if pool.size() == 0:
+		if draw_pool.size() == 0:
 			break
-		new_hand.append(pool.pop_back())
+		new_hand.append(draw_pool.pop_back())
 
 	# Store authoritative hand if you use player_hands server-side
 	player_hands[player_id] = new_hand

@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=3 uid="uid://cudva8w7g4cq6"]
+[gd_scene format=3 uid="uid://cudva8w7g4cq6"]
 
 [ext_resource type="PackedScene" uid="uid://dedbpf86ccbmq" path="res://scenes/card_holder.tscn" id="1_ibkli"]
 [ext_resource type="PackedScene" uid="uid://bgotnrxymhdmn" path="res://scenes/camera_manager.tscn" id="2_78awf"]
@@ -44,7 +44,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_qy1jj")
 }],
-"loop": true,
+"loop": 1,
 "name": &"default",
 "speed": 6.0
 }]
@@ -74,7 +74,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_mcffj")
 }],
-"loop": true,
+"loop": 1,
 "name": &"host",
 "speed": 5.0
 }, {
@@ -85,7 +85,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_7ua8r")
 }],
-"loop": true,
+"loop": 1,
 "name": &"opponent",
 "speed": 5.0
 }]
@@ -115,7 +115,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_kyk2p")
 }],
-"loop": true,
+"loop": 1,
 "name": &"host",
 "speed": 5.0
 }, {
@@ -126,7 +126,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_y5y3l")
 }],
-"loop": true,
+"loop": 1,
 "name": &"opponent",
 "speed": 5.0
 }]
@@ -175,6 +175,9 @@ region = Rect2(5760, 0, 640, 360)
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": null
+}, {
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_45i86")
 }, {
 "duration": 1.0,
@@ -204,21 +207,21 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_0bq3a")
 }],
-"loop": true,
+"loop": 2,
 "name": &"default",
 "speed": 5.0
 }]
 
-[node name="Game" type="Control"]
+[node name="Game" type="Control" unique_id=494729718]
 layout_mode = 3
 anchors_preset = 0
 offset_left = 4.0
 offset_right = 4.0
 script = ExtResource("2_gamegd")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=337563452]
 
-[node name="PlayerName" type="Label" parent="CanvasLayer"]
+[node name="PlayerName" type="Label" parent="CanvasLayer" unique_id=1887077953]
 offset_left = 127.0
 offset_top = 513.0
 offset_right = 277.0
@@ -226,7 +229,7 @@ offset_bottom = 541.0
 theme_override_fonts/font = ExtResource("3_s0nni")
 text = "CUrrent Player"
 
-[node name="PlayerEnergy" type="Label" parent="CanvasLayer"]
+[node name="PlayerEnergy" type="Label" parent="CanvasLayer" unique_id=1821601239]
 offset_left = 562.0
 offset_top = 565.0
 offset_right = 599.0
@@ -236,7 +239,7 @@ theme_override_fonts/font = ExtResource("3_s0nni")
 text = " 3"
 horizontal_alignment = 1
 
-[node name="OpponentName" type="Label" parent="CanvasLayer"]
+[node name="OpponentName" type="Label" parent="CanvasLayer" unique_id=441534481]
 offset_left = 868.0
 offset_top = 517.0
 offset_right = 982.0
@@ -245,7 +248,7 @@ theme_override_fonts/font = ExtResource("3_s0nni")
 text = "OppPlayer"
 horizontal_alignment = 2
 
-[node name="OpponentEnergy" type="Label" parent="CanvasLayer"]
+[node name="OpponentEnergy" type="Label" parent="CanvasLayer" unique_id=625480444]
 offset_left = 1018.0
 offset_top = 617.0
 offset_right = 1132.0
@@ -255,7 +258,7 @@ text = "Energy: 3
 "
 horizontal_alignment = 2
 
-[node name="EnergySprite" type="AnimatedSprite2D" parent="CanvasLayer"]
+[node name="EnergySprite" type="AnimatedSprite2D" parent="CanvasLayer" unique_id=1483124272]
 visible = false
 position = Vector2(1032, 686)
 scale = Vector2(0.871429, 0.871429)
@@ -263,7 +266,7 @@ sprite_frames = SubResource("SpriteFrames_3xj3m")
 autoplay = "default"
 frame_progress = 0.242046
 
-[node name="Label" type="Label" parent="CanvasLayer"]
+[node name="Label" type="Label" parent="CanvasLayer" unique_id=939281389]
 visible = false
 offset_left = 566.09
 offset_top = 627.5
@@ -275,10 +278,10 @@ theme_override_fonts/font = ExtResource("3_s0nni")
 theme_override_font_sizes/font_size = 8
 horizontal_alignment = 1
 
-[node name="Timer" type="Timer" parent="CanvasLayer"]
+[node name="Timer" type="Timer" parent="CanvasLayer" unique_id=1813547125]
 autostart = true
 
-[node name="PlayerHealthbar" parent="CanvasLayer" instance=ExtResource("8_400sg")]
+[node name="PlayerHealthbar" parent="CanvasLayer" unique_id=1390892545 instance=ExtResource("8_400sg")]
 offset_left = 28.0
 offset_top = 427.0
 offset_right = 292.0
@@ -289,7 +292,7 @@ metadata/_edit_lock_ = true
 position = Vector2(131.5, 181.375)
 scale = Vector2(3.5125, 3.81563)
 
-[node name="OpponentHealthbar" parent="CanvasLayer" instance=ExtResource("8_400sg")]
+[node name="OpponentHealthbar" parent="CanvasLayer" unique_id=1751915666 instance=ExtResource("8_400sg")]
 offset_left = 873.0
 offset_top = 433.0
 offset_right = 1137.0
@@ -300,21 +303,21 @@ metadata/_edit_lock_ = true
 position = Vector2(131.5, 181.375)
 scale = Vector2(3.5125, 3.81563)
 
-[node name="OpponentCards" parent="CanvasLayer" instance=ExtResource("1_ibkli")]
+[node name="OpponentCards" parent="CanvasLayer" unique_id=1389160309 instance=ExtResource("1_ibkli")]
 z_index = 1
 offset_left = -483.0
 offset_top = -157.0
 offset_right = -72.0
 offset_bottom = -10.0
 
-[node name="PlayerCards" parent="CanvasLayer" instance=ExtResource("1_ibkli")]
+[node name="PlayerCards" parent="CanvasLayer" unique_id=1356552431 instance=ExtResource("1_ibkli")]
 z_index = 1
 offset_left = 354.0
 offset_top = 575.0
 offset_right = 733.952
 offset_bottom = 722.208
 
-[node name="PlayerSprite" type="AnimatedSprite2D" parent="CanvasLayer"]
+[node name="PlayerSprite" type="AnimatedSprite2D" parent="CanvasLayer" unique_id=453662843]
 position = Vector2(105, 503)
 scale = Vector2(2.32813, 2.65625)
 sprite_frames = SubResource("SpriteFrames_7ua8r")
@@ -323,7 +326,7 @@ autoplay = "host"
 frame_progress = 0.0131258
 metadata/_edit_lock_ = true
 
-[node name="OpponentSprite" type="AnimatedSprite2D" parent="CanvasLayer"]
+[node name="OpponentSprite" type="AnimatedSprite2D" parent="CanvasLayer" unique_id=952357003]
 position = Vector2(1057, 498)
 scale = Vector2(2.32813, 2.65625)
 sprite_frames = SubResource("SpriteFrames_vjgi4")
@@ -332,7 +335,7 @@ autoplay = "opponent"
 frame_progress = 0.0617318
 metadata/_edit_lock_ = true
 
-[node name="camera_manager" parent="." instance=ExtResource("2_78awf")]
+[node name="camera_manager" parent="." unique_id=1012840274 instance=ExtResource("2_78awf")]
 position = Vector2(-4, 0)
 min_zoom = 1.0
 drag_speed = 2.0
@@ -342,7 +345,7 @@ limit_right = 1800.0
 limit_bottom = 300.0
 pan_margin = 128.0
 
-[node name="ColorRect" type="ColorRect" parent="camera_manager"]
+[node name="ColorRect" type="ColorRect" parent="camera_manager" unique_id=644342814]
 offset_left = -1087.0
 offset_top = -511.0
 offset_right = -978.25
@@ -350,46 +353,50 @@ offset_bottom = -455.57
 scale = Vector2(31.94, 31.94)
 color = Color(0, 0, 0, 1)
 
-[node name="Sprite2D4" type="Sprite2D" parent="camera_manager"]
+[node name="Sprite2D4" type="Sprite2D" parent="camera_manager" unique_id=269115669]
 position = Vector2(568, 156)
 scale = Vector2(1.13, 1.13)
 texture = ExtResource("9_45i86")
 
-[node name="Sprite2D6" type="Sprite2D" parent="camera_manager"]
+[node name="Sprite2D6" type="Sprite2D" parent="camera_manager" unique_id=1337678372]
 position = Vector2(2724, 156)
 scale = Vector2(1.13, 1.13)
 texture = ExtResource("9_45i86")
 
-[node name="Sprite2D3" type="Sprite2D" parent="camera_manager"]
+[node name="Sprite2D3" type="Sprite2D" parent="camera_manager" unique_id=1571980923]
 position = Vector2(349, 248)
 scale = Vector2(0.9, 0.9)
 texture = ExtResource("10_2rd6h")
 
-[node name="Sprite2D5" type="Sprite2D" parent="camera_manager"]
+[node name="Sprite2D5" type="Sprite2D" parent="camera_manager" unique_id=1074082386]
 position = Vector2(1654, 248)
 scale = Vector2(0.9, 0.9)
 texture = ExtResource("10_2rd6h")
 
-[node name="Players" type="Node" parent="."]
+[node name="Players" type="Node" parent="." unique_id=1058644435]
 
-[node name="PlayerPlot" parent="." instance=ExtResource("3_cpr0p")]
+[node name="PlayerPlot" parent="." unique_id=1223270048 instance=ExtResource("3_cpr0p")]
+layout_mode = 0
 offset_left = -8.0
 offset_top = 49.0
 offset_right = -8.0
 offset_bottom = 49.0
 scale = Vector2(6, 6)
 
-[node name="OpponentPlot" parent="." instance=ExtResource("3_cpr0p")]
+[node name="OpponentPlot" parent="." unique_id=1001996243 instance=ExtResource("3_cpr0p")]
+layout_mode = 0
 offset_left = 1297.0
 offset_top = 45.0
 offset_right = 1297.0
 offset_bottom = 45.0
 scale = Vector2(6, 6)
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=785212416]
 visible = false
+position = Vector2(315, 132)
+scale = Vector2(0.32578132, 0.34999996)
 sprite_frames = SubResource("SpriteFrames_754j2")
-frame_progress = 0.459087
+frame_progress = 0.9179157
 
 [connection signal="timeout" from="CanvasLayer/Timer" to="." method="_on_timer_timeout"]
 

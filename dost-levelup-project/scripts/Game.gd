@@ -160,7 +160,26 @@ func _on_card_clicked(slot_index: int) -> void:
 func _replace_card(slot_index: int) -> void:
 	if not Network or not Network.available_card_ids or Network.available_card_ids.is_empty():
 		return
-		
+	
+	# Check if this player's board is full - if so, only draw disaster cards
+	var my_id = multiplayer.get_unique_id()
+	var board_full = _is_player_board_full()
+	if board_full:
+		# Tell the server this player should only receive disaster cards
+		Network.call_or_rpc_id(1, "set_player_disaster_draw", [my_id, true])
+		# Pick a random disaster card
+		var disaster_pool = Network.disaster_only_card_ids
+		if disaster_pool.is_empty():
+			return
+		var new_id = disaster_pool[randi() % disaster_pool.size()]
+		var res_path = "res://cards/card_%d.tres" % new_id
+		if ResourceLoader.exists(res_path):
+			var card_res = ResourceLoader.load(res_path)
+			if local_hand and slot_index >= 0 and slot_index < local_hand.slots.size():
+				local_hand.slots[slot_index].item = card_res
+				_populate_card_holder(player_cards, [], true)
+		return
+	
 	# Pick a random card from available pool
 	var available = Network.available_card_ids
 	var new_id = available[randi() % available.size()]
@@ -173,6 +192,22 @@ func _replace_card(slot_index: int) -> void:
 			local_hand.slots[slot_index].item = card_res
 			# Update UI
 			_populate_card_holder(player_cards, [], true)
+
+func _is_player_board_full() -> bool:
+	# Check if all plots on the player's board are occupied
+	if not has_node("PlayerPlot"):
+		return false
+	var player_plot = $PlayerPlot
+	if not player_plot.has_node("GridContainer"):
+		return false
+	var container = player_plot.get_node("GridContainer")
+	var total_plots = container.get_child_count()
+	var occupied = 0
+	for i in range(total_plots):
+		var btn = container.get_child(i)
+		if btn and btn.is_occupied:
+			occupied += 1
+	return occupied >= total_plots
 
 # Connect player plot buttons so taps can place buildings
 func _connect_plot_slots() -> void:
