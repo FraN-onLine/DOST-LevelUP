@@ -1,57 +1,60 @@
 extends Control
 
-@onready var ip_display_label = null
+@onready var name_input = $CenterContainer/VBoxContainer/NameInput
+@onready var start_button = $CenterContainer/VBoxContainer/StartButton
+@onready var back_button = $CenterContainer/VBoxContainer/BackButton
+@onready var status_label = $StatusLabel
 
 func _ready():
-	# Optional: listen for connection signals from the Network autoload
-	if Engine.has_singleton("Network"):
-		Network.connected.connect(_on_network_connected)
+	# Connect button signals
+	start_button.pressed.connect(_on_start_pressed)
+	back_button.pressed.connect(_on_back_pressed)
+	name_input.text_submitted.connect(_on_name_submitted)
 	
-	# Try to find IP display label if it exists in the scene
-	if has_node("IPDisplayLabel"):
-		ip_display_label = $IPDisplayLabel
+	# Connect to network signals
+	Network.connected.connect(_on_network_connected)
+	
+	# Focus on the name input so the user can type immediately
+	name_input.grab_focus()
+	
+	# Pre-fill with any existing host name
+	name_input.text = Network.host_name if Network.host_name != "Host" else ""
+	if name_input.text.is_empty():
+		name_input.text = "Player"
+	
+	status_label.text = "Enter your name to host a game"
 
-func _on_server_pressed():
-	# Start the host (server + local player)
+func _on_start_pressed():
+	_start_hosting()
+
+func _on_name_submitted(_text: String):
+	_start_hosting()
+
+func _on_back_pressed():
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+func _start_hosting():
+	var name = name_input.text.strip_edges()
+	if name.is_empty():
+		status_label.text = "Please enter a name first"
+		return
+	
+	# Set the host name on the Network autoload
+	Network.set_host_name(name)
+	
+	status_label.text = "Starting host as '%s'..." % name
+	start_button.disabled = true
+	
+	# Start the host - auto uses the local machine's IP on the LAN
 	Network.start_host()
-	
-	# Get local IP addresses
-	var local_ips = _get_local_ip_addresses()
-	var ip_message = "Host started!\n\nShare this info with other players:\n"
-	if local_ips.size() > 0:
-		ip_message += "IP: %s\n" % local_ips[0]
-		for i in range(1, local_ips.size()):
-			ip_message += "or: %s\n" % local_ips[i]
-	else:
-		ip_message += "Run 'ipconfig' in Command Prompt to find your IP\n"
-	ip_message += "Port: %d" % Network.DEFAULT_PORT
-	
-	# Display in label if available
-	if ip_display_label:
-		ip_display_label.text = ip_message
-		ip_display_label.visible = true
-	
-	# Print helpful join instructions to console
-	print("========================================")
-	print(ip_message)
-	print("========================================")
 
-func _get_local_ip_addresses() -> Array:
-	var ips = []
-	# Get all local IP addresses from network interfaces
-	for ip in IP.get_local_addresses():
-		# Filter out localhost and IPv6
-		if ip.begins_with("192.168.") or ip.begins_with("10.") or ip.begins_with("172."):
-			ips.append(ip)
-	return ips
-
-func _on_network_connected(success, reason):
-	if success:
-		# Move to lobby where the MultiplayerSpawner can spawn the host player
-		var lobby_path = "res://scenes/Lobby.tscn"
-		if ResourceLoader.exists(lobby_path):
-			get_tree().change_scene_to_file(lobby_path)
-		else:
-			print("Lobby scene not found at %s, but host started: %s" % [lobby_path, reason])
+func _on_network_connected(success: bool, reason: String):
+	start_button.disabled = false
+	
+	if success and reason == "host_started":
+		status_label.text = "Host started! Waiting for players..."
+		# Move to lobby
+		get_tree().change_scene_to_file("res://scenes/Lobby.tscn")
 	else:
-		push_error("Failed to start host: %s" % reason)
+		status_label.text = "Failed to start host: " + reason
+

@@ -2,6 +2,9 @@ extends Node
 
 const DEFAULT_IP := "localhost"
 const DEFAULT_PORT := 12345
+const DISCOVERY_PORT := 12346
+const DISCOVERY_INTERVAL := 1.0
+const DISCOVERY_TIMEOUT_MS := 5000
 @export var MAX_PLAYERS: int = 2
 
 signal player_joined(peer_id)
@@ -9,6 +12,19 @@ signal player_left(peer_id)
 signal connected(success, reason)
 signal player_list_updated(players)
 signal game_started
+signal host_discovered(host_name, ip)
+signal host_lost(ip)
+
+var host_name := "Host"
+var _discovery_udp: PacketPeerUDP = null
+var _discovery_listen_timer: Timer = null
+var _discovery_broadcast_timer: Timer = null
+var _discovery_request_timer: Timer = null
+var _host_listen_udp: PacketPeerUDP = null
+var _host_listen_timer: Timer = null
+var _discovered_hosts := {}  # ip -> {name: String, last_seen: int}
+var _discovery_active := false
+var _is_host_broadcasting := false
 
 var peer: ENetMultiplayerPeer
 var started = false
@@ -108,23 +124,25 @@ func start_host(port: int = DEFAULT_PORT) -> void:
 	
 	# Add host to players list
 	var host_id = multiplayer.get_unique_id()
-	players[host_id] = "Host"
+	players[host_id] = host_name
 	# Print current available_card_ids so user knows what the server will draw from
 	print("[Network] available_card_ids = %s (count=%d)" % [available_card_ids, available_card_ids.size()])
 	# initialize energy for host
 	player_energy[host_id] = 3
 	broadcast_player_list()
 	
+	# Start broadcasting presence so other players on the LAN can discover this host
+	start_host_discovery()
+	
 	print("========================================")
 	print("Server started on port %d" % port)
-	print("Local IP addresses for LAN connection:")
-	print("  - Use 'ipconfig' (Windows) or 'ifconfig' (Mac/Linux) to find your LAN IP")
-	print("  - Share this IP (192.168.x.x or 10.x.x.x) with other players")
-	print("  - Port: %d" % port)
+	print("Host name: %s" % host_name)
+	print("Broadcasting presence on LAN (port %d)..." % DISCOVERY_PORT)
 	print("========================================")
 	emit_signal("connected", true, "host_started")
 
 func stop_host() -> void:
+	stop_host_discovery()
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer = null
 		peer = null
@@ -155,10 +173,216 @@ func join_host(ip: String = DEFAULT_IP, port: int = DEFAULT_PORT) -> void:
 	multiplayer.multiplayer_peer = peer
 
 func leave_host() -> void:
+	stop_host_discovery()
 	if multiplayer.multiplayer_peer:
 		multiplayer.multiplayer_peer = null
 		peer = null
 		print("Left host / disconnected")
+
+# ============================================
+# LAN Host Discovery (UDP broadcast)
+# ============================================
+
+func set_host_name(name: String) -> void:
+	host_name = name.strip_edges()
+	if host_name.is_empty():
+		host_name = "Host"
+	# If we're already hosting, update the broadcast name
+	if _is_host_broadcasting:
+		_broadcast_host_presence()
+
+func get_discovered_hosts() -> Dictionary:
+	return _discovered_hosts.duplicate()
+
+func start_host_discovery() -> void:
+	# Host side: start broadcasting presence on the LAN
+	if _is_host_broadcasting:
+		return
+	_is_host_broadcasting = true
+	
+	# Bind a listening socket to respond to discovery requests from clients
+	_host_listen_udp = PacketPeerUDP.new()
+	var err = _host_listen_udp.bind(DISCOVERY_PORT)
+	if err != OK:
+		push_warning("Failed to bind host discovery listen port %d: %s" % [DISCOVERY_PORT, err])
+		_host_listen_udp = null
+	
+	# Set up periodic broadcast timer (use a dedicated timer, separate from listening)
+	_discovery_broadcast_timer = Timer.new()
+	_discovery_broadcast_timer.wait_time = DISCOVERY_INTERVAL
+	_discovery_broadcast_timer.one_shot = false
+	add_child(_discovery_broadcast_timer)
+	_discovery_broadcast_timer.timeout.connect(_broadcast_host_presence)
+	_discovery_broadcast_timer.start()
+	
+	# Set up timer to process incoming discovery requests from clients
+	if _host_listen_udp:
+		_host_listen_timer = Timer.new()
+		_host_listen_timer.wait_time = 0.5
+		_host_listen_timer.one_shot = false
+		add_child(_host_listen_timer)
+		_host_listen_timer.timeout.connect(_process_host_discovery_requests)
+		_host_listen_timer.start()
+	
+	_broadcast_host_presence()
+	print("[Network] Host discovery broadcasting started (name: %s)" % host_name)
+
+func stop_host_discovery() -> void:
+	_is_host_broadcasting = false
+	if _discovery_broadcast_timer:
+		_discovery_broadcast_timer.stop()
+		_discovery_broadcast_timer.queue_free()
+		_discovery_broadcast_timer = null
+	if _host_listen_timer:
+		_host_listen_timer.stop()
+		_host_listen_timer.queue_free()
+		_host_listen_timer = null
+	if _host_listen_udp:
+		_host_listen_udp.close()
+		_host_listen_udp = null
+
+func _broadcast_host_presence() -> void:
+	if not _is_host_broadcasting:
+		return
+	var msg = "DOST_LEVELUP_HOST|%s" % host_name
+	var payload = msg.to_utf8_buffer()
+	# Build list of destinations: global broadcast + each interface's subnet broadcast
+	var destinations := ["255.255.255.255"]
+	for ip in IP.get_local_addresses():
+		if typeof(ip) == TYPE_STRING and not ip.begins_with("127.") and ":" not in ip:
+			# Create subnet broadcast address: keep network prefix, set last octet to 255
+			var parts = ip.split(".")
+			if parts.size() == 4:
+				parts[3] = "255"
+				var subnet_bcast = ".".join(parts)
+				if subnet_bcast not in destinations:
+					destinations.append(subnet_bcast)
+	for dest in destinations:
+		var udp = PacketPeerUDP.new()
+		udp.set_broadcast_enabled(true)
+		var err = udp.set_dest_address(dest, DISCOVERY_PORT)
+		if err == OK:
+			udp.put_packet(payload)
+		udp.close()
+
+func _process_host_discovery_requests() -> void:
+	# Host side: respond to client discovery requests with a unicast
+	if not _is_host_broadcasting or not _host_listen_udp:
+		return
+	while _host_listen_udp.get_available_packet_count() > 0:
+		var packet = _host_listen_udp.get_packet()
+		var from_ip = _host_listen_udp.get_packet_ip()
+		var from_port = _host_listen_udp.get_packet_port()
+		var data = packet.get_string_from_utf8()
+		if data == "DOST_LEVELUP_DISCOVER":
+			# Respond with unicast directly to the requester
+			var udp = PacketPeerUDP.new()
+			var err = udp.set_dest_address(from_ip, from_port)
+			if err == OK:
+				var msg = "DOST_LEVELUP_HOST|%s" % host_name
+				udp.put_packet(msg.to_utf8_buffer())
+			udp.close()
+			print("[Network] Responded to discovery request from %s:%d" % [from_ip, from_port])
+
+func start_discovery() -> void:
+	# Client side: start listening for host responses on the LAN
+	if _discovery_active:
+		return
+	_discovery_active = true
+	_discovered_hosts.clear()
+	_discovery_udp = PacketPeerUDP.new()
+	# Always bind to port 0 (random) to avoid conflicts with the host's DISCOVERY_PORT
+	# The host responds to our source port, so we don't need to be on DISCOVERY_PORT
+	var err = _discovery_udp.bind(0)
+	if err != OK:
+		push_error("Failed to bind discovery UDP: %s" % err)
+		_discovery_active = false
+		return
+	# Send an initial discovery request to find hosts immediately
+	_send_discovery_request()
+	# Set up periodic timer to check for host responses and stale hosts
+	_discovery_listen_timer = Timer.new()
+	_discovery_listen_timer.wait_time = 0.5
+	_discovery_listen_timer.one_shot = false
+	add_child(_discovery_listen_timer)
+	_discovery_listen_timer.timeout.connect(_process_discovery_packets)
+	_discovery_listen_timer.start()
+	# Set up periodic timer to re-send discovery requests so new hosts are found
+	_discovery_request_timer = Timer.new()
+	_discovery_request_timer.wait_time = 2.0
+	_discovery_request_timer.one_shot = false
+	add_child(_discovery_request_timer)
+	_discovery_request_timer.timeout.connect(_send_discovery_request)
+	_discovery_request_timer.start()
+	print("[Network] LAN discovery started")
+
+func stop_discovery() -> void:
+	_discovery_active = false
+	if _discovery_udp:
+		_discovery_udp.close()
+		_discovery_udp = null
+	if _discovery_listen_timer:
+		_discovery_listen_timer.stop()
+		_discovery_listen_timer.queue_free()
+		_discovery_listen_timer = null
+	if _discovery_request_timer:
+		_discovery_request_timer.stop()
+		_discovery_request_timer.queue_free()
+		_discovery_request_timer = null
+	_discovered_hosts.clear()
+
+func _send_discovery_request() -> void:
+	# Client side: broadcast a discovery request so hosts respond with unicast
+	# IMPORTANT: Send from the SAME listening socket (_discovery_udp) so the host
+	# can respond to our source port. Using a temporary socket would cause the
+	# host's response to go to a closed port and be lost.
+	if not _discovery_active or not _discovery_udp:
+		return
+	var payload = "DOST_LEVELUP_DISCOVER".to_utf8_buffer()
+	var destinations := ["255.255.255.255"]
+	for ip in IP.get_local_addresses():
+		if typeof(ip) == TYPE_STRING and not ip.begins_with("127.") and ":" not in ip:
+			var parts = ip.split(".")
+			if parts.size() == 4:
+				parts[3] = "255"
+				var subnet_bcast = ".".join(parts)
+				if subnet_bcast not in destinations:
+					destinations.append(subnet_bcast)
+	_discovery_udp.set_broadcast_enabled(true)
+	for dest in destinations:
+		var err = _discovery_udp.set_dest_address(dest, DISCOVERY_PORT)
+		if err == OK:
+			_discovery_udp.put_packet(payload)
+
+func _process_discovery_packets() -> void:
+	if not _discovery_active or not _discovery_udp:
+		return
+	var now = Time.get_ticks_msec()
+	# Process all available packets
+	while _discovery_udp.get_available_packet_count() > 0:
+		var packet = _discovery_udp.get_packet()
+		var from_ip = _discovery_udp.get_packet_ip()
+		var data = packet.get_string_from_utf8()
+		if data.begins_with("DOST_LEVELUP_HOST|"):
+			var host_name_from_packet = data.substr("DOST_LEVELUP_HOST|".length())
+			# Don't skip local IPs - this allows same-machine testing
+			# (the client is never the host in this flow, so any local response is a real host)
+			if not _discovered_hosts.has(from_ip):
+				_discovered_hosts[from_ip] = {"name": host_name_from_packet, "last_seen": now}
+				print("[Network] Discovered host: %s at %s" % [host_name_from_packet, from_ip])
+				emit_signal("host_discovered", host_name_from_packet, from_ip)
+			else:
+				_discovered_hosts[from_ip]["last_seen"] = now
+				_discovered_hosts[from_ip]["name"] = host_name_from_packet
+	# Remove stale hosts (not seen within timeout)
+	var to_remove := []
+	for ip in _discovered_hosts.keys():
+		if now - int(_discovered_hosts[ip]["last_seen"]) > DISCOVERY_TIMEOUT_MS:
+			to_remove.append(ip)
+	for ip in to_remove:
+		_discovered_hosts.erase(ip)
+		print("[Network] Host lost: %s" % ip)
+		emit_signal("host_lost", ip)
 
 func _on_peer_connected(id: int) -> void:
 	print("Peer connected: %d" % id)
